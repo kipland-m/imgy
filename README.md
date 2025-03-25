@@ -1,2 +1,2 @@
 # imgy
-Python-based command line tool to resize images.
+C-based command line tool to resize images.
