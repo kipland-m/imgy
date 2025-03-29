@@ -5,8 +5,9 @@
 
 # Compiler and flags
 CC = gcc
-CFLAGS = -g -Wall -ansi  # Debug, warnings, ANSI C
-LDFLAGS = -L/usr/local/lib  # Where libs live (Homebrew default on macOS)
+CFLAGS = -g -Wall -ansi -I/opt/homebrew/opt/jpeg/include  
+LDFLAGS = -L/opt/homebrew/opt/jpeg/lib  
+LDLIBS = -ljpeg  
 
 # Directories
 SRC = src
@@ -20,4 +21,3 @@ $(BIN)/imgy: $(SRC)/main.c
 .PHONY: clean
 clean:
 	rm -f $(BIN)/imgy
-
