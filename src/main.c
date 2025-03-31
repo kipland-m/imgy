@@ -6,14 +6,16 @@ struct jpeg_decompress_struct decomp;
 struct jpeg_error_mgr jpeg_err;
 FILE* fptr;
 
-int main(int argc, char *argv[]) {
+void read_jpeg_file(struct jpeg_decompress_struct decomp, char *filepath) {
   /* initializing error handler */
   decomp.err = jpeg_std_error(&jpeg_err);
   jpeg_create_decompress(&decomp);
 
-  /* printf("%d\n", argc); */
+  if (filepath == NULL) {
+    printf("Missing filepath?\n");
+  }
 
-  fptr = fopen("test-images/MoonKilledCthun.jpg", "rb");
+  fptr = fopen(filepath, "rb");
   if (fptr == NULL) {
     printf("File was not found\n");
     exit(0);
@@ -28,7 +30,11 @@ int main(int argc, char *argv[]) {
 
   printf("%d\n", decomp.image_height);
   printf("%d\n", decomp.image_width);
+  printf("%d\n", decomp.num_components); 
+}
 
+int main(int argc, char *argv[]) {
+  read_jpeg_file(decomp, argv[1]);
 
   return 0;
 }
