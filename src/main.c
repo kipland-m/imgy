@@ -6,6 +6,11 @@ struct jpeg_decompress_struct decomp;
 struct jpeg_error_mgr jpeg_err;
 FILE* fptr;
 
+/*
+ *  In order to read a jpeg file, we will need to provide a file and tell it to decompress the file
+ *  via the decompression struct
+ */
+
 void read_jpeg_file(struct jpeg_decompress_struct decomp, char *filepath) {
   /* initializing error handler */
   decomp.err = jpeg_std_error(&jpeg_err);
@@ -16,6 +21,7 @@ void read_jpeg_file(struct jpeg_decompress_struct decomp, char *filepath) {
   }
 
   fptr = fopen(filepath, "rb");
+
   if (fptr == NULL) {
     printf("File was not found\n");
     exit(0);
@@ -31,6 +37,11 @@ void read_jpeg_file(struct jpeg_decompress_struct decomp, char *filepath) {
   printf("%d\n", decomp.image_height);
   printf("%d\n", decomp.image_width);
   printf("%d\n", decomp.num_components); 
+
+  (void) jpeg_start_decompress(&decomp);
+
+  
+
 }
 
 int main(int argc, char *argv[]) {
