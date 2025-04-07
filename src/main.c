@@ -2,8 +2,7 @@
 #include <stdlib.h>
 #include <jpeglib.h>
 
-/* open_file will return infptr (infile pointer)
- */
+/* open_file will return infptr (infile pointer) */
 FILE* open_file(char *filepath) { 
   if (filepath == NULL) {
     printf("Missing filepath?\n");
@@ -22,24 +21,21 @@ FILE* open_file(char *filepath) {
 }
 
 /* do_read_jpeg will handle reading any data related to our image.
- * (header data, pixel data)
- */
+ * (header data, pixel data) */
 int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *outfilepath) {
   struct jpeg_error_mgr jpeg_err;
   decomp.err = jpeg_std_error(&jpeg_err); /* pointing decomp's 'err' to our jpeg_err struct */
+
   JSAMPARRAY buffer = NULL; /* defining buffer for 8-bit jpeg */
   unsigned char *full_buffer; /* this buffer will hold our entire jpeg */
 
-  /* providing infile pointer to decompression struct 
-   */
+  /* providing infile pointer to decompression struct */
   jpeg_stdio_src(&decomp, open_file(infilepath));
 
-  /* we are giving our decompression struct some header data 
-   */
+  /* we are giving our decompression struct some header data */
   (void) jpeg_read_header(&decomp, TRUE);
 
-  /* DEBUG
-   */
+  /* DEBUG */
   printf("%d\n", decomp.image_height);
   printf("%d\n", decomp.image_width);
   printf("%d\n", decomp.num_components); 
@@ -62,8 +58,7 @@ int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *o
 }
 
 int read_jpeg(char *infile, char *outfile) {
-  /* Creating and initializing decompression struct
-   */
+  /* Creating and initializing decompression struct */
   struct jpeg_decompress_struct decomp;
   jpeg_create_decompress(&decomp);
 
