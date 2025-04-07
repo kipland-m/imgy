@@ -27,8 +27,8 @@ FILE* open_file(char *filepath) {
 int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *outfilepath) {
   struct jpeg_error_mgr jpeg_err;
   decomp.err = jpeg_std_error(&jpeg_err); /* pointing decomp's 'err' to our jpeg_err struct */
-
   JSAMPARRAY buffer = NULL; /* defining buffer for 8-bit jpeg */
+  unsigned char *full_buffer; /* this buffer will hold our entire jpeg */
 
   /* providing infile pointer to decompression struct 
    */
@@ -48,6 +48,8 @@ int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *o
 
   int row_stride = decomp.output_width * decomp.output_components;
   buffer = (*decomp.mem->alloc_sarray)((j_common_ptr)&decomp, JPOOL_IMAGE, row_stride, 1);
+  full_buffer = malloc(decomp.output_width * decomp.output_height * decomp.output_components);
+  printf("full_buffer size: %d\n", decomp.output_width * decomp.output_height * decomp.output_components);
 
   while (decomp.output_scanline < decomp.output_height) {
     (void) jpeg_read_scanlines(&decomp, buffer, 1);
