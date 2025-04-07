@@ -7,6 +7,7 @@
 FILE* open_file(char *filepath) { 
   if (filepath == NULL) {
     printf("Missing filepath?\n");
+    exit(1);
   }
 
   FILE* infptr = fopen(filepath, "rb");
@@ -25,17 +26,16 @@ FILE* open_file(char *filepath) {
  */
 int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *outfilepath) {
   struct jpeg_error_mgr jpeg_err;
+  decomp.err = jpeg_std_error(&jpeg_err); /* pointing decomp's 'err' to our jpeg_err struct */
+
   JSAMPARRAY buffer = NULL; /* defining buffer for 8-bit jpeg */
 
-  /* we are initialzing jpeg_err with jpeg_std_error(),
-   * and sets decomp's "err" to point to our jpeg_err struct
+  /* providing infile pointer to decompression struct 
    */
-  decomp.err = jpeg_std_error(&jpeg_err);
-
-  /* providing infile pointer to decompression struct */
   jpeg_stdio_src(&decomp, open_file(infilepath));
 
-  /* we are giving our decompression struct some header data */
+  /* we are giving our decompression struct some header data 
+   */
   (void) jpeg_read_header(&decomp, TRUE);
 
   /* DEBUG
@@ -47,6 +47,14 @@ int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *o
   (void) jpeg_start_decompress(&decomp);
 
   int row_stride = decomp.output_width * decomp.output_components;
+  buffer = (*decomp.mem->alloc_sarray)((j_common_ptr)&decomp, JPOOL_IMAGE, row_stride, 1);
+
+  while (decomp.output_scanline < decomp.output_height) {
+    (void) jpeg_read_scanlines(&decomp, buffer, 1);
+    printf("%d", buffer[0][0]);
+    /* fwrite(buffer[0], 1, row_stride, tmpfile()); */
+  }
+  printf("\n");
 
   return 0;
 }
