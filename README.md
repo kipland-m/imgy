@@ -51,9 +51,12 @@ How should we build this project? Well, it's C. So, thank god, that we don't hav
 
 ## Example Usage (as of now)
 - Compiling
+
 	\>`make`
 	If you have access/use `make` on your system, simply utilize the included makefile in this repo.
+
 - Running the program and real usage
+
 	\>`./bin/imgy <path/to/file>`
 
 
