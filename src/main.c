@@ -59,9 +59,12 @@ int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *o
  
   /* write into buffer here */
   while (decomp.output_scanline < decomp.output_height) {
-    printf("%d\n", decomp.output_scanline);
-    (void) jpeg_read_scanlines(&decomp, &row_pointers[decomp.output_scanline], 1);
-    printf("%d %d %d\n", full_buffer[0], full_buffer[10080], full_buffer[20160]);
+    printf("output scanline: %d\n", decomp.output_scanline);
+    int rows_read = jpeg_read_scanlines(&decomp, &row_pointers[decomp.output_scanline], 1);  
+    printf("full buffer[%d]: %d\n", 10080, full_buffer[10080]);
+    printf("row %d: %d\n", decomp.output_scanline, full_buffer[decomp.output_scanline * row_stride]);
+    printf("rows read: %d\n", rows_read);
+/*    printf("%d %d %d\n", full_buffer[0], full_buffer[10080], full_buffer[20160]); */
   }
   printf("\n");
 
