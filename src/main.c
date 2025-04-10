@@ -26,8 +26,10 @@ int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *o
   struct jpeg_error_mgr jpeg_err;
   decomp.err = jpeg_std_error(&jpeg_err); /* pointing decomp's 'err' to our jpeg_err struct */
 
-  JSAMPARRAY buffer = NULL; /* defining buffer for 8-bit jpeg */
-  JSAMPARRAY full_buffer = NULL;
+  int i;
+  int row_stride;
+  unsigned char * full_buffer = NULL;
+  JSAMPARRAY row_pointers = malloc(decomp.output_height * sizeof(unsigned char *));
 
   /* providing infile pointer to decompression struct */
   jpeg_stdio_src(&decomp, open_file(infilepath));
@@ -42,20 +44,24 @@ int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *o
 
   (void) jpeg_start_decompress(&decomp);
 
-  int row_stride = decomp.output_width * decomp.output_components;
-  buffer = (*decomp.mem->alloc_sarray)((j_common_ptr)&decomp, JPOOL_IMAGE, row_stride, 1);
+  row_stride = decomp.output_width * decomp.output_components;
 
   /* allocating big ass buffer to store whole image
    * in the case of MoonKilledCthun.jpg, it is ~21 million bytes large
    */
   full_buffer = malloc(decomp.output_width * decomp.output_height * decomp.output_components);
   printf("full_buffer size: %d\n", decomp.output_width * decomp.output_height * decomp.output_components);
+
+  for (i = 0; i < decomp.output_height; i++) {
+    row_pointers[i] = full_buffer + (i * row_stride);
+    printf("%p\n", row_pointers[i]);
+  }
  
   /* write into buffer here */
   while (decomp.output_scanline < decomp.output_height) {
-    (void) jpeg_read_scanlines(&decomp, buffer, 1);
-    printf("%d", buffer[0][0]);
-    /* fwrite(buffer[0], 1, row_stride, tmpfile()); */
+    printf("%d\n", decomp.output_scanline);
+    (void) jpeg_read_scanlines(&decomp, &row_pointers[decomp.output_scanline], 1);
+    printf("%d %d %d\n", full_buffer[0], full_buffer[10080], full_buffer[20160]);
   }
   printf("\n");
 
