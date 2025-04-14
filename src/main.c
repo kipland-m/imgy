@@ -53,18 +53,29 @@ int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *o
   printf("full_buffer size: %d\n", decomp.output_width * decomp.output_height * decomp.output_components);
 
   for (i = 0; i < decomp.output_height; i++) {
+    /* scary pointer arithmetic, jumping forward <row length> amount in bytes */
     row_pointers[i] = full_buffer + (i * row_stride);
-    printf("%p\n", row_pointers[i]);
+    printf("row %d: %p\n", i, (void *)row_pointers[i]);
   }
  
   /* write into buffer here */
   while (decomp.output_scanline < decomp.output_height) {
+
+    int rows_read = jpeg_read_scanlines(&decomp, &row_pointers[decomp.output_scanline], 1);
+
+    /*
     printf("output scanline: %d\n", decomp.output_scanline);
-    int rows_read = jpeg_read_scanlines(&decomp, &row_pointers[decomp.output_scanline], 1);  
     printf("full buffer[%d]: %d\n", 10080, full_buffer[10080]);
+    printf("full buffer[%d]: %d\n", 10081, full_buffer[10081]);
+    printf("full buffer[%d]: %d\n", 10082, full_buffer[10082]);
+    printf("full buffer[%d]: %d\n", 10083, full_buffer[10083]);
+    printf("full buffer[%d]: %d\n", 10084, full_buffer[10084]);
+    printf("full buffer[%d]: %d\n", 10085, full_buffer[10085]);
     printf("row %d: %d\n", decomp.output_scanline, full_buffer[decomp.output_scanline * row_stride]);
     printf("rows read: %d\n", rows_read);
-/*    printf("%d %d %d\n", full_buffer[0], full_buffer[10080], full_buffer[20160]); */
+    printf("%d %d %d\n", full_buffer[0], full_buffer[10080], full_buffer[20160]); 
+  */
+
   }
   printf("\n");
 
