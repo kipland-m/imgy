@@ -21,7 +21,7 @@ FILE* open_file(char *filepath) {
 }
 
 /* do_read_jpeg will handle reading any data related to our image.
- * (header data, pixel data) */
+ */
 int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *outfilepath) {
   struct jpeg_error_mgr jpeg_err;
   decomp.err = jpeg_std_error(&jpeg_err); /* pointing decomp's 'err' to our jpeg_err struct */
@@ -29,7 +29,7 @@ int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *o
   int i;
   int row_stride;
   unsigned char * full_buffer = NULL;
-  JSAMPARRAY row_pointers = malloc(decomp.output_height * sizeof(unsigned char *));
+  JSAMPARRAY row_pointers = malloc(decomp.output_height * sizeof(unsigned char *)); /* will store pointers of all rows of full_buffer */
 
   /* providing infile pointer to decompression struct */
   jpeg_stdio_src(&decomp, open_file(infilepath));
@@ -57,7 +57,6 @@ int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *o
   for (i = 0; i < decomp.output_height; i++) {
     /* scary pointer arithmetic, jumping forward <row length> amount in bytes */
     row_pointers[i] = full_buffer + (i * row_stride);
-
     /*
     printf("row %d: %p\n", i, (void *)row_pointers[i]);
     */
@@ -66,12 +65,9 @@ int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *o
   /* write into buffer here */
   while (decomp.output_scanline < decomp.output_height) {
     int rows_read = jpeg_read_scanlines(&decomp, &row_pointers[decomp.output_scanline], 1);
-
-    /*
-    printf("%d %d %d\n", full_buffer[0], full_buffer[10080], full_buffer[20160]); 
-    */
   }
-  printf("\n");
+
+  printf("pixel 0: R%d G%d B%d\n", full_buffer[0], full_buffer[1], full_buffer[2]); 
 
   return 0;
 }
