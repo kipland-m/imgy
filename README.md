@@ -8,6 +8,7 @@ imgy is my C-based command line tool to provide a simple, effective way to resiz
 - Compiling
 
 	\>`make`
+
 	If you have access/use `make` on your system, simply utilize the included makefile in this repo.
 - Running the program and real usage
 
