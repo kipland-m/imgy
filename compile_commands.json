@@ -1,0 +1,19 @@
+[
+  {
+    "arguments": [
+      "/usr/bin/gcc",
+      "-g",
+      "-Wall",
+      "-ansi",
+      "-I./include",
+      "-I/opt/homebrew/opt/jpeg/include",
+      "-c",
+      "-o",
+      "obj/main.o",
+      "src/main.c"
+    ],
+    "directory": "/Users/kiplandmelton/Documents/dev/c-lang/imgy",
+    "file": "/Users/kiplandmelton/Documents/dev/c-lang/imgy/src/main.c",
+    "output": "/Users/kiplandmelton/Documents/dev/c-lang/imgy/obj/main.o"
+  }
+]

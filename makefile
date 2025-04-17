@@ -5,7 +5,7 @@
 
 # Compiler and flags
 CC = gcc
-CFLAGS = -g -Wall -ansi -Iinclude -I/opt/homebrew/opt/jpeg/include
+CFLAGS = -g -Wall -ansi -I./include -I/opt/homebrew/opt/jpeg/include
 LDFLAGS = -L/opt/homebrew/opt/jpeg/lib
 LDLIBS = -ljpeg
 
