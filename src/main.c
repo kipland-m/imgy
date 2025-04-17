@@ -1,24 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <jpeglib.h>
-
-/* open_file will return infptr (infile pointer) */
-FILE* open_file(char *filepath) { 
-  if (filepath == NULL) {
-    printf("Missing filepath?\n");
-    exit(1);
-  }
-
-  FILE* infptr = fopen(filepath, "rb");
-
-  if (infptr == NULL) {
-    printf("File was not found\n");
-    exit(1);
-  } else {
-    printf("File loaded successfully\n");
-    return infptr;
-  }
-}
+#include "helpers.h"
 
 /* do_read_jpeg will handle reading any data related to our image.
  */
@@ -55,8 +38,6 @@ int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *o
   printf("full_buffer size: %d\n", decomp.output_width * decomp.output_height * decomp.output_components);
 
   for (i = 0; i < decomp.output_height; i++) {
-    /* scary pointer arithmetic, jumping forward <row length> amount in bytes */
-
     /* full_buffer is a POINTER to an SEQUENCE of bytes. 
      * full_buffer[0] will refer to our FIRST byte in our allocated buffer to store
      * a provided image.
@@ -86,9 +67,6 @@ void resize_jpeg(unsigned char *input_buffer) {
    */
   int OUTPUT_WIDTH = 800;
   int OUTPUT_HEIGHT = 600;
-
-
-
 }
 
 /* need to add desired output size, etc */

@@ -5,19 +5,34 @@
 
 # Compiler and flags
 CC = gcc
-CFLAGS = -g -Wall -ansi -I/opt/homebrew/opt/jpeg/include  
-LDFLAGS = -L/opt/homebrew/opt/jpeg/lib  
-LDLIBS = -ljpeg  
+CFLAGS = -g -Wall -ansi -Iinclude -I/opt/homebrew/opt/jpeg/include
+LDFLAGS = -L/opt/homebrew/opt/jpeg/lib
+LDLIBS = -ljpeg
 
 # Directories
 SRC = src
+OBJ = obj
 BIN = bin
 
+# Object files
+OBJECTS = $(OBJ)/main.o $(OBJ)/helpers.o
+
 # Targets
-$(BIN)/imgy: $(SRC)/main.c
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $(BIN)/imgy $(SRC)/main.c $(LDLIBS)
+all: $(BIN)/imgy
+
+$(BIN)/imgy: $(OBJECTS)
+	$(CC) $(OBJECTS) -o $@ $(LDFLAGS) $(LDLIBS)
+
+$(OBJ)/main.o: $(SRC)/main.c include/helpers.h
+	$(CC) $(CFLAGS) -c $< -o $@
+
+$(OBJ)/helpers.o: $(SRC)/helpers.c include/helpers.h
+	$(CC) $(CFLAGS) -c $< -o $@
 
 # Phony targets
 .PHONY: clean
 clean:
-	rm -f $(BIN)/imgy
+	rm -f $(OBJ)/*.o $(OBJ)/*.os $(BIN)/imgy
+
+# Ensure obj and bin directories exist
+$(shell mkdir -p $(OBJ) $(BIN))
