@@ -56,17 +56,21 @@ int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *o
 
   for (i = 0; i < decomp.output_height; i++) {
     /* scary pointer arithmetic, jumping forward <row length> amount in bytes */
-    /* so, I had to revisit this, because my lack of understanding was bothering me.
-     * we have to realize that full_buffer is a POINTER to an ARRAY of bytes. 
+
+    /* full_buffer is a POINTER to an SEQUENCE of bytes. 
      * full_buffer[0] will refer to our FIRST byte in our allocated buffer to store
-     * a provided image.*/
+     * a provided image.
+     *
+     * so, in this context- know that full_buffer is an ADDRESS. the way pointer math works
+     * is that when we add an int to a pointer, it will represent the address 'x' amount of 
+     * bytes away from the original address. (where in our case x = (i * row_stride))
+     */
     row_pointers[i] = full_buffer + (i * row_stride);
-    /*
-    printf("row %d: %p\n", i, (void *)row_pointers[i]);
-    */
   }
  
-  /* write into buffer here */
+  /* keep in mind- since our row_pointers is an array of pointers that
+   * are *pointing* at the rows of our full_buffer, we are writing into our full_buffer here.
+   * */
   while (decomp.output_scanline < decomp.output_height) {
     int rows_read = jpeg_read_scanlines(&decomp, &row_pointers[decomp.output_scanline], 1);
   }
