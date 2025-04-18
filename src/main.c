@@ -3,6 +3,34 @@
 #include <jpeglib.h>
 #include "helpers.h"
 
+void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buffer) {
+  /* For each pixel in the resized image, determine the corresponding pixel in the original image.
+   * This involves using the scale factor to calculate the coordinates of the nearest
+   * pixel in the original image.
+   *
+   * Formula: sourceX = int(round( targetX / targetWidth * sourceWidth )) 
+   *          sourceY = int(round( targetY / targetHeight * sourceHeight )) 
+   * */
+  int OUTPUT_WIDTH = 800;
+  int OUTPUT_HEIGHT = 600;
+  int scale_factor_height = OUTPUT_HEIGHT/ decomp.output_height;
+  int scale_factor_width = OUTPUT_WIDTH / decomp.output_width;
+
+  unsigned char *resize_buffer = NULL;
+  int row_stride = OUTPUT_WIDTH * decomp.output_components;
+  JSAMPARRAY row_pointers = malloc(decomp.output_height * sizeof(unsigned char *)); 
+
+  int i;
+  for (i = 0; i < decomp.output_height; i++) {
+    row_pointers[i] = resize_buffer + (i * row_stride);
+    printf("%p", row_pointers[i]);
+  }
+
+  int source_x;
+  int source_y;
+
+}
+
 /* do_read_jpeg will handle reading any data related to our image.
  */
 int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *outfilepath) {
@@ -53,21 +81,16 @@ int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *o
    * are *pointing* at the rows of our full_buffer, we are writing into our full_buffer here.
    * */
   while (decomp.output_scanline < decomp.output_height) {
-    int rows_read = jpeg_read_scanlines(&decomp, &row_pointers[decomp.output_scanline], 1);
+    (void) jpeg_read_scanlines(&decomp, &row_pointers[decomp.output_scanline], 1);
   }
   printf("pixel 0: R%d G%d B%d\n", full_buffer[0], full_buffer[1], full_buffer[2]); /* first pixel first row */
   printf("pixel 3360: R%d G%d B%d\n", full_buffer[10078], full_buffer[10079], full_buffer[10080]); /* last pixel first row */
 
+  (void) resize_jpeg(decomp, full_buffer);
+
   return 0;
 }
 
-void resize_jpeg(unsigned char *input_buffer) {
-  /* testing implementation of nearest neighbor with hardcoded
-   * output size
-   */
-  int OUTPUT_WIDTH = 800;
-  int OUTPUT_HEIGHT = 600;
-}
 
 /* need to add desired output size, etc */
 int read_jpeg(char *infile, char *outfile) {
