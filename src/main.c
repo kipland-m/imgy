@@ -11,10 +11,15 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
    * Formula: sourceX = int(round( targetX / targetWidth * sourceWidth )) 
    *          sourceY = int(round( targetY / targetHeight * sourceHeight )) 
    * */
-  int OUTPUT_WIDTH = 800;
-  int OUTPUT_HEIGHT = 600;
-  int scale_factor_height = OUTPUT_HEIGHT/ decomp.output_height;
-  int scale_factor_width = OUTPUT_WIDTH / decomp.output_width;
+  float OUTPUT_WIDTH = 800.00;
+  float OUTPUT_HEIGHT = 600.00;
+  float scale_factor_height = OUTPUT_HEIGHT / decomp.output_height;
+  float scale_factor_width = OUTPUT_WIDTH / decomp.output_width;
+
+  /* debug
+   */
+  printf("%f\n", scale_factor_height);
+  printf("%f\n", scale_factor_width);
 
   unsigned char *resize_buffer = NULL;
   int row_stride = OUTPUT_WIDTH * decomp.output_components;
@@ -23,7 +28,9 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
   int i;
   for (i = 0; i < decomp.output_height; i++) {
     row_pointers[i] = resize_buffer + (i * row_stride);
-    printf("%p", row_pointers[i]);
+    /*
+    printf("%p\n", row_pointers[i]);
+    */
   }
 
   int source_x;
@@ -66,7 +73,7 @@ int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *o
   printf("full_buffer size: %d\n", decomp.output_width * decomp.output_height * decomp.output_components);
 
   for (i = 0; i < decomp.output_height; i++) {
-    /* full_buffer is a POINTER to an SEQUENCE of bytes. 
+    /* full_buffer is a POINTER to a SEQUENCE of bytes. 
      * full_buffer[0] will refer to our FIRST byte in our allocated buffer to store
      * a provided image.
      *
