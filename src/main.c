@@ -25,6 +25,8 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
   int row_stride = OUTPUT_WIDTH * decomp.output_components;
   JSAMPARRAY row_pointers = malloc(decomp.output_height * sizeof(unsigned char *)); 
 
+  resize_buffer = malloc(OUTPUT_WIDTH * OUTPUT_HEIGHT * decomp.output_components);
+
   int i;
   for (i = 0; i < decomp.output_height; i++) {
     row_pointers[i] = resize_buffer + (i * row_stride);
