@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <math.h>
 #include <jpeglib.h>
 #include "helpers.h"
 
@@ -11,7 +12,9 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
    * Formula: sourceX = int(round( targetX / targetWidth * sourceWidth )) 
    *          sourceY = int(round( targetY / targetHeight * sourceHeight )) 
    * */
-  float OUTPUT_WIDTH = 800.00;
+  float source_x;
+  float source_y;
+  float OUTPUT_WIDTH = 800.00; /* WIDTH AND HEIGHT HARDCODED FOR DEVELOPMENT PURPOSES */
   float OUTPUT_HEIGHT = 600.00;
   float scale_factor_height = OUTPUT_HEIGHT / decomp.output_height;
   float scale_factor_width = OUTPUT_WIDTH / decomp.output_width;
@@ -23,21 +26,34 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
 
   unsigned char *resize_buffer = NULL;
   int row_stride = OUTPUT_WIDTH * decomp.output_components;
-  JSAMPARRAY row_pointers = malloc(decomp.output_height * sizeof(unsigned char *)); 
+  JSAMPARRAY row_pointers = malloc(OUTPUT_HEIGHT * sizeof(unsigned char *)); 
 
   resize_buffer = malloc(OUTPUT_WIDTH * OUTPUT_HEIGHT * decomp.output_components);
 
+
+  /*
+   * THOUGHT NOTE
+   *
+   * IN order to resize.. we want to find an rgb value to fit inside of a new pixel position.
+   * SO, we must look at choosing a pixel mathematically to fit in a new home inside of our 
+   * resize_buffer.
+   */
   int i;
-  for (i = 0; i < decomp.output_height; i++) {
+  for (i = 0; i < OUTPUT_HEIGHT; i++) {
+    /* initialzing row_pointers */
     row_pointers[i] = resize_buffer + (i * row_stride);
-    /*
-    printf("%p\n", row_pointers[i]);
-    */
+
+    source_y = round(i / OUTPUT_HEIGHT * decomp.output_height); 
+    printf("height: %d, %f\n", i, source_y);
+
   }
 
-  int source_x;
-  int source_y;
+  int j;
+  for (j = 0; j < OUTPUT_WIDTH; j++) {
 
+    source_x = round(j / OUTPUT_WIDTH * decomp.output_width); 
+    printf("width: %d, %f\n", j, source_x);
+  }
 }
 
 /* do_read_jpeg will handle reading any data related to our image.
