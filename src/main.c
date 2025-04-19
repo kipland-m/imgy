@@ -16,13 +16,6 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
   float source_y;
   float OUTPUT_WIDTH = 800.00; /* WIDTH AND HEIGHT HARDCODED FOR DEVELOPMENT PURPOSES */
   float OUTPUT_HEIGHT = 600.00;
-  float scale_factor_height = OUTPUT_HEIGHT / decomp.output_height;
-  float scale_factor_width = OUTPUT_WIDTH / decomp.output_width;
-
-  /* debug
-   */
-  printf("%f\n", scale_factor_height);
-  printf("%f\n", scale_factor_width);
 
   unsigned char *resize_buffer = NULL;
   int row_stride = OUTPUT_WIDTH * decomp.output_components;
@@ -38,22 +31,25 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
    * SO, we must look at choosing a pixel mathematically to fit in a new home inside of our 
    * resize_buffer.
    */
+
+
   int i;
+  int j;
   for (i = 0; i < OUTPUT_HEIGHT; i++) {
-    /* initialzing row_pointers */
     row_pointers[i] = resize_buffer + (i * row_stride);
 
     source_y = round(i / OUTPUT_HEIGHT * decomp.output_height); 
     printf("height: %d, %f\n", i, source_y);
 
   }
-
-  int j;
   for (j = 0; j < OUTPUT_WIDTH; j++) {
 
     source_x = round(j / OUTPUT_WIDTH * decomp.output_width); 
     printf("width: %d, %f\n", j, source_x);
   }
+
+
+
 }
 
 /* do_read_jpeg will handle reading any data related to our image.
