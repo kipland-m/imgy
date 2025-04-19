@@ -41,14 +41,19 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
     source_y = round(i / OUTPUT_HEIGHT * decomp.output_height); 
     printf("height: %d, %f\n", i, source_y);
 
+    /* we actually DO want a nested loop-
+     * this is because 'i' will represent which row we are currently dealing with.
+     * then, our inner loop will represent writing in ALL the pixels on the current ROW we are on
+     * (i.e. 'i') 
+     */
+
+    for (j = 0; j < OUTPUT_WIDTH; j++) {
+
+      source_x = round(j / OUTPUT_WIDTH * decomp.output_width); 
+      printf("width: %d, %f\n", j, source_x);
+
+    }
   }
-  for (j = 0; j < OUTPUT_WIDTH; j++) {
-
-    source_x = round(j / OUTPUT_WIDTH * decomp.output_width); 
-    printf("width: %d, %f\n", j, source_x);
-  }
-
-
 
 }
 
