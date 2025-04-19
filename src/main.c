@@ -46,12 +46,16 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
      * then, our inner loop will represent writing in ALL the pixels on the current ROW we are on
      * (i.e. 'i') 
      */
+
+    /* NOTE FOR THE FUTURE: WE DO NOT NEED TO CALCULATE THIS EACH TIME..
+     * WE CAN BUILD AND ARRAY AND ITERATE THROUGH ONCE TO KNOW WHICH X PIXELS MAPS TO WHICH.
+     */
     for (j = 0; j < OUTPUT_WIDTH; j++) {
 
       source_x = round(j / OUTPUT_WIDTH * decomp.output_width); 
 
       /*
-       * So each 'i' will represent the currenty row we are oprating on.
+       * So each 'i' will represent the curren row we are operating on.
        * 'j' will repeat with each row iterated ('i'). but, 'j' represents
        * which pixel in our resize_buffer needs to be full_buffer[source_x]
        */
