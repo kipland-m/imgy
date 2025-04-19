@@ -46,12 +46,16 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
      * then, our inner loop will represent writing in ALL the pixels on the current ROW we are on
      * (i.e. 'i') 
      */
-
     for (j = 0; j < OUTPUT_WIDTH; j++) {
 
       source_x = round(j / OUTPUT_WIDTH * decomp.output_width); 
-      printf("width: %d, %f\n", j, source_x);
 
+      /*
+       * So each 'i' will represent the currenty row we are oprating on.
+       * 'j' will repeat with each row iterated ('i'). but, 'j' represents
+       * which pixel in our resize_buffer needs to be full_buffer[source_x]
+       */
+      printf("width: %d, %f\n", j, source_x);
     }
   }
 
