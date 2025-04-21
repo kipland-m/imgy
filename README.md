@@ -6,17 +6,13 @@ imgy is my C-based command line tool to provide a simple, effective way to resiz
 
 ## Example usage (as of now):
 - Compiling
-
 	\>`make`
-
 	If you have access/use `make` on your system, simply utilize the included makefile in this repo.
 - Running the program and real usage
-
 	\>`./bin/imgy <path/to/file>`
 
 ### End goal example usage:
 Example usage as follows:
-
 	> imgy /pictures/KipNaked.png 600x800
 	KipNaked.png has been resized to 600x800.
 
@@ -72,22 +68,17 @@ Making progress
 	Next we need to create a buffer and write the output of the decompression process to this buffer. 
 
 I have made the full buffer by using:
-
 	`full_buffer = malloc(decomp.output_width * decomp.output_height * decomp.output_components);` 
-
-So we are allocating a section in memory with `malloc` that is the size of the width *times* the *height* times the *output components (3 = RGB)*. This buffer will store the entire RGB data of our image.
+	So we are allocating a section in memory with `malloc` that is the size of the width *times* the *height* times the *output components (3 = RGB)*. This buffer will store the entire RGB data of our image.
 	
 Also, we are creating an array of pointers to the rows of our image:
+	 `JSAMPARRAY row_pointers = malloc(decomp.output_height * sizeof(unsigned char *));` 
+	 We then use a for loop to allocate all the memory addresses (*pointers*) by doing some black-magic pointer arithmetic. This allows us to allocate our row pointers in the proper distance away from each other, in our test image's case would be 10080 bytes apart.
+	 The reason we have an array of row pointers is to have an easy way to point to every row in our image. Inside of our while loop, that utilizes jpeg_read_scanlines(), we provide a row of our buffer to read pixel data into (i.e. we provided `&row_pointers(i)`)
 
-	 `JSAMPARRAY row_pointers = malloc(decomp.output_height * sizeof(unsigned char *));`
-
- We then use a for loop to allocate all the memory addresses (*pointers*) by doing some black-magic pointer arithmetic. This allows us to allocate our row pointers in the proper distance away from each other, in our test image's case would be 10080 bytes apart.
- The reason we have an array of row pointers is to have an easy way to point to every row in our image. Inside of our while loop, that utilizes jpeg_read_scanlines(), we provide a row of our buffer to read pixel data into (i.e. we provided `&row_pointers(i)`)
-
-As briefly touched on in the previous note, we have a while loop that actually handles allocating the pixel data into our buffer:
-
-    `int rows_read = jpeg_read_scanlines(&decomp, &row_pointers[decomp.output_scanline], 1);`
-
+As briefly touched on in the previous note, we have a while loop that actually handles allocating the pixel data into our buffer. 
+	`int rows_read = jpeg_read_scanlines(&decomp, 
+			`&row_pointers[decomp.output_scanline], 1);`
 We have to realize that full_buffer is a POINTER to an ARRAY of bytes. 
 `full_buffer[0]` will refer to our FIRST byte in our allocated buffer to store
 a provided image.
@@ -96,4 +87,17 @@ So, in this context- know that full_buffer is an ADDRESS. the way pointer math w
 is that when we add an int to an address, it will represent the address 'x' amount of 
 bytes away from the original address. (where x = `(i * row_stride)`)
 So we are practically saying hey, make this element in our row_pointers array to be the address of `full_buffer` `x` amount of bytes away.
+
+We are reading our scanlines from the provided image into our buffer with our while loop.
+This allows us to access RGB pixel data like so:
+	  `printf("pixel 0: R%d G%d B%d\n", full_buffer[0], full_buffer[1], full_buffer[2]); /* first pixel first row */
+	  `printf("pixel 3360: R%d G%d B%d\n", full_buffer[10078], full_buffer[10079], full_buffer[10080]); /* last pixel first row */`
+I know that it seems weird to access pixel data about pixel 3360 at `[10078]` but due to the nature of dealing with RGB data, each byte will represent Red, Green, Blue in the rows of our buffer.
+
+But hey, NOW WE HAVE A BUFFER FULL OF PIXEL DATA!
+What's next?
+Now, we can start writing our resizing function. This function will take in a few things, like our `decomp` struct and our `full_buffer` that we will refer to as the `input_buffer` in the context of resizing.
+Our resizing function will deal with things similarly to our read function, like setting up a `resize_buffer` (to store the RGB data about our new image) getting the row stride for this resize buffer, row pointers blah blah blah.. all that jazz
+But the real FAT of the function will be in our meticulously crafted nested for loop- this for loop will handle setting our row pointers as the for loop in our `read_jpeg` function did, but this about the only similarity to that loop. 
+In the outer loop, we will iterate on the amount of ROWS in our image. We have a nifty variable calculation
 
