@@ -4,6 +4,14 @@
 #include <jpeglib.h>
 #include "helpers.h"
 
+void save_jpeg(unsigned char *resize_buffer) {
+  struct jpeg_compress_struct comp;
+  jpeg_create_compress(&comp);
+
+
+}
+
+
 void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buffer) {
   /* For each pixel in the resized image, determine the corresponding pixel in the original image.
    * This involves using the scale factor to calculate the coordinates of the nearest
@@ -15,6 +23,8 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
 
   int source_x;
   int source_y;
+  int offset;
+  int resize_offset;
   float OUTPUT_WIDTH = 800.00; /* WIDTH AND HEIGHT HARDCODED FOR DEVELOPMENT PURPOSES */
   float OUTPUT_HEIGHT = 600.00;
 
@@ -24,7 +34,6 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
 
   resize_buffer = malloc(OUTPUT_WIDTH * OUTPUT_HEIGHT * decomp.output_components);
 
-
   /*
    * THOUGHT NOTE
    *
@@ -33,20 +42,12 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
    * resize_buffer.
    */
 
-
   int i;
   int j;
   for (i = 0; i < OUTPUT_HEIGHT; i++) {
     row_pointers[i] = resize_buffer + (i * row_stride);
 
     source_y = round(i / OUTPUT_HEIGHT * decomp.output_height); 
-    printf("height: %d, %d\n", i, source_y);
-
-    /* we actually DO want a nested loop-
-     * this is because 'i' will represent which row we are currently dealing with.
-     * then, our inner loop will represent writing in ALL the pixels on the current ROW we are on
-     * (i.e. 'i') 
-     */
 
     /* NOTE FOR THE FUTURE: WE DO NOT NEED TO CALCULATE THIS EACH TIME..
      * WE CAN BUILD AND ARRAY AND ITERATE THROUGH IT *ONCE* TO KNOW WHICH X PIXELS MAPS TO WHICH.
@@ -55,15 +56,25 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
      */
     for (j = 0; j < OUTPUT_WIDTH; j++) {
       source_x = round(j / OUTPUT_WIDTH * decomp.output_width);
+      offset = source_y * decomp.output_width * 3 + source_x * 3;
+      resize_offset = i * row_stride + j * 3;
 
       /*
        * So each 'i' will represent the current row we are operating on.
        * 'j' will repeat with each row iterated ('i'). but, 'j' represents
        * which pixel in our resize_buffer needs to be input_buffer[source_x]
        */
-      printf("width: %d, %d\n", j, source_x);
 
-      printf("%d\n", input_buffer[source_y * decomp.output_width * 3 + source_x * 3]);
+      resize_buffer[resize_offset] = input_buffer[offset];
+      resize_buffer[resize_offset + 1] = input_buffer[offset + 1];
+      resize_buffer[resize_offset + 2] = input_buffer[offset + 2];
+
+      if (i < 2 && j < 2){
+        printf("%d\n", resize_buffer[resize_offset]);
+        printf("%d\n", resize_buffer[resize_offset + 1]);
+        printf("%d\n", resize_buffer[resize_offset + 2]);
+      }
+
     }
   }
 
