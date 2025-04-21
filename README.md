@@ -30,10 +30,14 @@ We could add some flags in there:
 	Made a resized copy of CuteBinky.jpg (CuteBinky1.jpg)  
   
 How will we be doing the resizing?
-	Initially we will be testing using only jpegs, but safe to assume for now that pngs will follow a similar process
-	To resize the image, we are doing a bunch of black magic C stuff that I intend to understand more as this project progresses.
-	First, we will be creating a struct with *jpeg_decompress_struct* hold things related to the image such as a pointer to the actual file, header data about the dimensions of the image, and some error configuration so we can properly resolve issues related to processing the image.
-	Then, we will begin decompressing the image and reading the pixel lines of the image. Now, with access to pixel data, we will be able to load it up in a buffer then which we can start doing some resizing magic from.
+
+    Initially we will be testing using only jpegs, but safe to assume for now that pngs will follow a similar process
+
+    To resize the image, we are doing a bunch of black magic C stuff that I intend to understand more as this project progresses.
+
+    First, we will be creating a struct with *jpeg_decompress_struct* hold things related to the image such as a pointer to the actual file, header data about the dimensions of the image, and some error configuration so we can properly resolve issues related to processing the image.
+
+    Then, we will begin decompressing the image and reading the pixel lines of the image. Now, with access to pixel data, we will be able to load it up in a buffer then which we can start doing some resizing magic from.
 
 # The big picture
 Really, our program revolves around a few things:
@@ -46,9 +50,13 @@ We are creating a few structs with libjpeg, and loading them up with metadata. W
 We then read details about the image like its header data, to understand things like the dimensions of the image.
 
 Then, we start the decompression process.
+
 We create a variable that represents the length of a row of pixels in our image 
+
 We create a buffer that will be capable of holding all the pixels in our image. This is calculated by the length times the height times the components (components = 3 for RGB).
+
 ## High-level code overview
+
 How should we build this project? Well, it's C. So, thank god, that we don't have to deal with stupid OOP principles. We are going to have a couple files that have a variety of functions that we will try our best to have clear, defined purposes. So what will these functions look like?
 
 * int main(int main(int argc, char \*argv[])
