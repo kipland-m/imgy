@@ -73,17 +73,23 @@ Making progress
 	Next we need to create a buffer and write the output of the decompression process to this buffer. 
 
 I have made the full buffer by using:
+
 	`full_buffer = malloc(decomp.output_width * decomp.output_height * decomp.output_components);` 
-	So we are allocating a section in memory with `malloc` that is the size of the width *times* the *height* times the *output components (3 = RGB)*. This buffer will store the entire RGB data of our image.
+
+So we are allocating a section in memory with `malloc` that is the size of the width *times* the *height* times the *output components (3 = RGB)*. This buffer will store the entire RGB data of our image.
 	
 Also, we are creating an array of pointers to the rows of our image:
+
 	 `JSAMPARRAY row_pointers = malloc(decomp.output_height * sizeof(unsigned char *));` 
-	 We then use a for loop to allocate all the memory addresses (*pointers*) by doing some black-magic pointer arithmetic. This allows us to allocate our row pointers in the proper distance away from each other, in our test image's case would be 10080 bytes apart.
-	 The reason we have an array of row pointers is to have an easy way to point to every row in our image. Inside of our while loop, that utilizes jpeg_read_scanlines(), we provide a row of our buffer to read pixel data into (i.e. we provided `&row_pointers(i)`)
+
+ We then use a for loop to allocate all the memory addresses (*pointers*) by doing some black-magic pointer arithmetic. This allows us to allocate our row pointers in the proper distance away from each other, in our test image's case would be 10080 bytes apart.
+ The reason we have an array of row pointers is to have an easy way to point to every row in our image. Inside of our while loop, that utilizes jpeg_read_scanlines(), we provide a row of our buffer to read pixel data into (i.e. we provided `&row_pointers(i)`)
 
 As briefly touched on in the previous note, we have a while loop that actually handles allocating the pixel data into our buffer. 
+
 	`int rows_read = jpeg_read_scanlines(&decomp, 
 			`&row_pointers[decomp.output_scanline], 1);`
+
 We have to realize that full_buffer is a POINTER to an ARRAY of bytes. 
 `full_buffer[0]` will refer to our FIRST byte in our allocated buffer to store
 a provided image.
@@ -95,8 +101,10 @@ So we are practically saying hey, make this element in our row_pointers array to
 
 We are reading our scanlines from the provided image into our buffer with our while loop.
 This allows us to access RGB pixel data like so:
+
 	  `printf("pixel 0: R%d G%d B%d\n", full_buffer[0], full_buffer[1], full_buffer[2]); /* first pixel first row */
 	  `printf("pixel 3360: R%d G%d B%d\n", full_buffer[10078], full_buffer[10079], full_buffer[10080]); /* last pixel first row */`
+
 I know that it seems weird to access pixel data about pixel 3360 at `[10078]` but due to the nature of dealing with RGB data, each byte will represent Red, Green, Blue in the rows of our buffer.
 
 But hey, NOW WE HAVE A BUFFER FULL OF PIXEL DATA!
