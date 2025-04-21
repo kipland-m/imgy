@@ -56,11 +56,15 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
      */
     for (j = 0; j < OUTPUT_WIDTH; j++) {
       source_x = round(j / OUTPUT_WIDTH * decomp.output_width);
+
+      /*
+       * Calculating offset values to map input_buffer[rgb_value_index]
+       * to its corresponding resize_buffer[rgb_value_index]
+       */
       offset = source_y * decomp.output_width * 3 + source_x * 3;
       resize_offset = i * row_stride + j * 3;
 
-      /*
-       * So each 'i' will represent the current row we are operating on.
+      /* So each 'i' will represent the current row we are operating on.
        * 'j' will repeat with each row iterated ('i'). but, 'j' represents
        * which pixel in our resize_buffer needs to be input_buffer[source_x]
        */
