@@ -12,8 +12,9 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
    * Formula: sourceX = int(round( targetX / targetWidth * sourceWidth )) 
    *          sourceY = int(round( targetY / targetHeight * sourceHeight )) 
    * */
-  float source_x;
-  float source_y;
+
+  int source_x;
+  int source_y;
   float OUTPUT_WIDTH = 800.00; /* WIDTH AND HEIGHT HARDCODED FOR DEVELOPMENT PURPOSES */
   float OUTPUT_HEIGHT = 600.00;
 
@@ -39,7 +40,7 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
     row_pointers[i] = resize_buffer + (i * row_stride);
 
     source_y = round(i / OUTPUT_HEIGHT * decomp.output_height); 
-    printf("height: %d, %f\n", i, source_y);
+    printf("height: %d, %d\n", i, source_y);
 
     /* we actually DO want a nested loop-
      * this is because 'i' will represent which row we are currently dealing with.
@@ -48,18 +49,21 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
      */
 
     /* NOTE FOR THE FUTURE: WE DO NOT NEED TO CALCULATE THIS EACH TIME..
-     * WE CAN BUILD AND ARRAY AND ITERATE THROUGH ONCE TO KNOW WHICH X PIXELS MAPS TO WHICH.
+     * WE CAN BUILD AND ARRAY AND ITERATE THROUGH IT *ONCE* TO KNOW WHICH X PIXELS MAPS TO WHICH.
+     *
+     * SOURCE_X IS ROW INDEPENDENT
      */
     for (j = 0; j < OUTPUT_WIDTH; j++) {
-
-      source_x = round(j / OUTPUT_WIDTH * decomp.output_width); 
+      source_x = round(j / OUTPUT_WIDTH * decomp.output_width);
 
       /*
-       * So each 'i' will represent the curren row we are operating on.
+       * So each 'i' will represent the current row we are operating on.
        * 'j' will repeat with each row iterated ('i'). but, 'j' represents
-       * which pixel in our resize_buffer needs to be full_buffer[source_x]
+       * which pixel in our resize_buffer needs to be input_buffer[source_x]
        */
-      printf("width: %d, %f\n", j, source_x);
+      printf("width: %d, %d\n", j, source_x);
+
+      printf("%d\n", input_buffer[source_y * decomp.output_width * 3 + source_x * 3]);
     }
   }
 
