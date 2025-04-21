@@ -82,7 +82,7 @@ Making progress
 
 I have made the full buffer by using:
 
-	`full_buffer = malloc(decomp.output_width * decomp.output_height * decomp.output_components);` 
+    full_buffer = malloc(decomp.output_width * decomp.output_height * decomp.output_components);
 
 So we are allocating a section in memory with `malloc` that is the size of the width *times* the *height* times the *output components (3 = RGB)*. This buffer will store the entire RGB data of our image.
 	
@@ -110,8 +110,8 @@ So we are practically saying hey, make this element in our row_pointers array to
 We are reading our scanlines from the provided image into our buffer with our while loop.
 This allows us to access RGB pixel data like so:
 
-	  printf("pixel 0: R%d G%d B%d\n", full_buffer[0], full_buffer[1], full_buffer[2]); /* first pixel first row */
-	  printf("pixel 3360: R%d G%d B%d\n", full_buffer[10078], full_buffer[10079], full_buffer[10080]); /* last pixel first row */
+    printf("pixel 0: R%d G%d B%d\n", full_buffer[0], full_buffer[1], full_buffer[2]); /* first pixel first row */
+    printf("pixel 3360: R%d G%d B%d\n", full_buffer[10078], full_buffer[10079], full_buffer[10080]); /* last pixel first row */
 
 I know that it seems weird to access pixel data about pixel 3360 at `[10078]` but due to the nature of dealing with RGB data, each byte will represent Red, Green, Blue in the rows of our buffer.
 
