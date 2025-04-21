@@ -31,13 +31,13 @@ We could add some flags in there:
   
 How will we be doing the resizing?
 
-    Initially we will be testing using only jpegs, but safe to assume for now that pngs will follow a similar process
+Initially we will be testing using only jpegs, but safe to assume for now that pngs will follow a similar process
 
-    To resize the image, we are doing a bunch of black magic C stuff that I intend to understand more as this project progresses.
+To resize the image, we are doing a bunch of black magic C stuff that I intend to understand more as this project progresses.
 
-    First, we will be creating a struct with *jpeg_decompress_struct* hold things related to the image such as a pointer to the actual file, header data about the dimensions of the image, and some error configuration so we can properly resolve issues related to processing the image.
+First, we will be creating a struct with *jpeg_decompress_struct* hold things related to the image such as a pointer to the actual file, header data about the dimensions of the image, and some error configuration so we can properly resolve issues related to processing the image.
 
-    Then, we will begin decompressing the image and reading the pixel lines of the image. Now, with access to pixel data, we will be able to load it up in a buffer then which we can start doing some resizing magic from.
+Then, we will begin decompressing the image and reading the pixel lines of the image. Now, with access to pixel data, we will be able to load it up in a buffer then which we can start doing some resizing magic from.
 
 # The big picture
 Really, our program revolves around a few things:
