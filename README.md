@@ -88,15 +88,15 @@ So we are allocating a section in memory with `malloc` that is the size of the w
 	
 Also, we are creating an array of pointers to the rows of our image:
 
-	 JSAMPARRAY row_pointers = malloc(decomp.output_height * sizeof(unsigned char *));
+    JSAMPARRAY row_pointers = malloc(decomp.output_height * sizeof(unsigned char *));
 
  We then use a for loop to allocate all the memory addresses (*pointers*) by doing some black-magic pointer arithmetic. This allows us to allocate our row pointers in the proper distance away from each other, in our test image's case would be 10080 bytes apart.
  The reason we have an array of row pointers is to have an easy way to point to every row in our image. Inside of our while loop, that utilizes jpeg_read_scanlines(), we provide a row of our buffer to read pixel data into (i.e. we provided `&row_pointers(i)`)
 
 As briefly touched on in the previous note, we have a while loop that actually handles allocating the pixel data into our buffer. 
 
-	int rows_read = jpeg_read_scanlines(&decomp, 
-			`&row_pointers[decomp.output_scanline], 1);
+    int rows_read = jpeg_read_scanlines(&decomp, 
+        &row_pointers[decomp.output_scanline], 1);
 
 We have to realize that full_buffer is a POINTER to an ARRAY of bytes. 
 `full_buffer[0]` will refer to our FIRST byte in our allocated buffer to store
