@@ -113,7 +113,7 @@ This allows us to access RGB pixel data like so:
     printf("pixel 0: R%d G%d B%d\n", full_buffer[0], full_buffer[1], full_buffer[2]); /* first pixel first row */
     printf("pixel 3360: R%d G%d B%d\n", full_buffer[10078], full_buffer[10079], full_buffer[10080]); /* last pixel first row */
 
-I know that it seems weird to access pixel data about pixel 3360 at `[10078]` but due to the nature of dealing with RGB data, each byte will represent Red, Green, Blue in the rows of our buffer.
+I know that it seems weird to access pixel data about pixel 3360 at `[10078]` but due to the nature of dealing with RGB data, each byte will represent Red, Green, Blue in the rows of our buffer. But we have to think of it as `row stride = 10080` since that is the LENGTH of each row. Our first row's rgb data will live in `[0]` through `[10080]`
 
 But hey, NOW WE HAVE A BUFFER FULL OF PIXEL DATA!
 What's next?
