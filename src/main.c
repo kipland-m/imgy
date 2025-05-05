@@ -4,10 +4,17 @@
 #include <jpeglib.h>
 #include "helpers.h"
 
-void save_jpeg(unsigned char *resize_buffer) {
+void save_jpeg(unsigned char *resize_buffer, char *outfilepath) {
   struct jpeg_compress_struct comp;
+  struct jpeg_error_mgr jpeg_err;
   jpeg_create_compress(&comp);
 
+  comp.err = jpeg_std_error(&jpeg_err); 
+
+  /*
+   * need to write to file
+   */
+  jpeg_stdio_dest(&comp, write_file(outfilepath));
 
 }
 
