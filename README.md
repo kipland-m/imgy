@@ -118,11 +118,14 @@ I know that it seems weird to access pixel data about pixel 3360 at `[10078]` bu
 But hey, NOW WE HAVE A BUFFER FULL OF PIXEL DATA!
 What's next?
 Now, we can start writing our resizing function. This function will take in a few things, like our `decomp` struct and our `full_buffer` that we will refer to as the `input_buffer` in the context of resizing.
+
 Our resizing function will deal with things similarly to our read function, like setting up a `resize_buffer` (to store the RGB data about our new image) getting the row stride for this resize buffer, row pointers blah blah blah.. all that jazz
+
 But the real FAT of the function will be in our meticulously crafted nested for loop- this for loop will handle setting our row pointers as the for loop in our `read_jpeg` function did, but this about the only similarity to that loop. 
+
 In the outer loop, we will iterate on the amount of ROWS in our image. We have a nifty variable calculation for our `source_y` position that we will use to calculate our offset in the inner part of the loop.
-Once we are in the inner loop, we will first calculate the `source_x` then our `offset`. In a comment I have:  Calculating offset values to map `input_buffer[rgb_value_index]`
-to its corresponding `resize_buffer[rgb_value_index]` and this describes it accurately. After that, we will calculate our `resize_offset` to tell the position to write pixel data to inside of our resize buffer.
+
+Once we are in the inner loop, we will first calculate the `source_x` then our `offset`. In a comment I have:  Calculating offset values to map `input_buffer[rgb_value_index]` to its corresponding `resize_buffer[rgb_value_index]` and this describes it accurately. After that, we will calculate our `resize_offset` to tell the position to write pixel data to inside of our resize buffer.
 
 Now, we are actually writing resized data inside of this new `resize_buffer` 😎
 
