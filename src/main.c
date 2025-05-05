@@ -14,12 +14,13 @@ void save_jpeg(unsigned char *resize_buffer, char *outfilepath) {
   /*
    * need to write to file
    */
+  printf("save_jpeg - %s\n", outfilepath);
   jpeg_stdio_dest(&comp, write_file(outfilepath));
 
 }
 
 
-void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buffer) {
+void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buffer, char *outfilepath) {
   /* For each pixel in the resized image, determine the corresponding pixel in the original image.
    * This involves using the scale factor to calculate the coordinates of the nearest
    * pixel in the original image.
@@ -89,6 +90,12 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
     }
   }
 
+  /*
+   * By this point, resize_buffer is filled and we are ready to call
+   * save_jpeg.
+   */
+  save_jpeg(resize_buffer, outfilepath);
+  
 }
 
 /* do_read_jpeg will handle reading any data related to our image.
@@ -146,7 +153,7 @@ int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *o
   printf("pixel 0: R%d G%d B%d\n", full_buffer[0], full_buffer[1], full_buffer[2]); /* first pixel first row */
   printf("pixel 3360: R%d G%d B%d\n", full_buffer[10078], full_buffer[10079], full_buffer[10080]); /* last pixel first row */
 
-  (void) resize_jpeg(decomp, full_buffer);
+  (void) resize_jpeg(decomp, full_buffer, outfilepath);
 
   return 0;
 }
