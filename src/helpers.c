@@ -20,6 +20,7 @@ FILE* open_file(char *filepath) {
   }
 }
 
+
 FILE* write_file(char *filepath) { 
   if (filepath == NULL) {
     printf("write_file - Missing filepath?\n");

@@ -4,7 +4,9 @@
 #include <jpeglib.h>
 #include "helpers.h"
 
-void save_jpeg(unsigned char *resize_buffer, char *outfilepath) {
+void save_jpeg(unsigned char *resize_buffer, char *outfilepath,
+                        float resize_width, float resize_height) {
+
   struct jpeg_compress_struct comp;
   struct jpeg_error_mgr jpeg_err;
   jpeg_create_compress(&comp);
@@ -16,6 +18,32 @@ void save_jpeg(unsigned char *resize_buffer, char *outfilepath) {
    */
   printf("save_jpeg - %s\n", outfilepath);
   jpeg_stdio_dest(&comp, write_file(outfilepath));
+
+  comp.image_height = resize_height;
+  comp.image_width = resize_width;
+  comp.input_components = 3;
+
+  jpeg_set_defaults(&comp);
+  jpeg_start_compress(&comp, TRUE);
+
+    while (comp.next_scanline < comp.image_height) {
+      /* jpeg_write_scanlines expects an array of pointers to scanlines.
+       * Here the array is only one element long, but you could pass
+       * more than one scanline at a time if that's more convenient.
+       *
+       *
+       * row_pointer[0] = image_buffer[comp.next_scanline];
+       * (void)jpeg_write_scanlines(&comp, row_pointer, 1);
+       */
+      printf("%d\n", comp.next_scanline);
+
+    }
+
+  /*
+   * DEBUG
+   */
+  printf("%d\n", comp.image_height);
+  printf("%d\n", comp.image_width);
 
 }
 
@@ -81,6 +109,9 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
       resize_buffer[resize_offset + 1] = input_buffer[offset + 1];
       resize_buffer[resize_offset + 2] = input_buffer[offset + 2];
 
+      /*
+       * DEBUG
+       */
       if (i < 2 && j < 2){
         printf("%d\n", resize_buffer[resize_offset]);
         printf("%d\n", resize_buffer[resize_offset + 1]);
@@ -94,9 +125,10 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
    * By this point, resize_buffer is filled and we are ready to call
    * save_jpeg.
    */
-  save_jpeg(resize_buffer, outfilepath);
+  save_jpeg(resize_buffer, outfilepath, OUTPUT_WIDTH, OUTPUT_HEIGHT);
   
 }
+
 
 /* do_read_jpeg will handle reading any data related to our image.
  */
@@ -113,6 +145,9 @@ int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *o
   jpeg_stdio_src(&decomp, open_file(infilepath));
 
   (void) jpeg_read_header(&decomp, TRUE);
+  /*
+   * DEBUG
+   */
   printf("%d\n", decomp.image_height);
   printf("%d\n", decomp.image_width);
   printf("%d\n", decomp.num_components); 
@@ -130,6 +165,10 @@ int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *o
   /* allocating big ass buffer to store whole image RGB data
    */
   full_buffer = malloc(decomp.output_width * decomp.output_height * decomp.output_components);
+
+  /*
+   * DEBUG
+   */
   printf("full_buffer size: %d\n", decomp.output_width * decomp.output_height * decomp.output_components);
 
   for (i = 0; i < decomp.output_height; i++) {
@@ -150,6 +189,10 @@ int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *o
   while (decomp.output_scanline < decomp.output_height) {
     (void) jpeg_read_scanlines(&decomp, &row_pointers[decomp.output_scanline], 1);
   }
+
+  /*
+   * DEBUG
+   */
   printf("pixel 0: R%d G%d B%d\n", full_buffer[0], full_buffer[1], full_buffer[2]); /* first pixel first row */
   printf("pixel 3360: R%d G%d B%d\n", full_buffer[10078], full_buffer[10079], full_buffer[10080]); /* last pixel first row */
 
@@ -166,6 +209,7 @@ int read_jpeg(char *infile, char *outfile) {
 
   return do_read_jpeg(decomp, infile, outfile); 
 }
+
 
 int main(int argc, char *argv[]) {
   read_jpeg(argv[1], argv[2]);
