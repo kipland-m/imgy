@@ -2,8 +2,6 @@
 
 imgy is my C-based command line tool to provide a simple, effective way to resize images through the command line. This is a tool with developers in mind. 
 
-**libpjeg notes**
-
 ### Features to implement!
 Here's what is currently on my plate to add/fix/improve on within *imgy*
 

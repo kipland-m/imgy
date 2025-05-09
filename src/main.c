@@ -4,9 +4,13 @@
 #include <jpeglib.h>
 #include "helpers.h"
 
+/* imgy - Written by Kipland Melton
+ *
+ * 05/08/25
+ */
+
 void save_jpeg(unsigned char *resize_buffer, JSAMPARRAY row_pointers, char *outfilepath,
                                                 float resize_width, float resize_height) {
-
   struct jpeg_compress_struct comp;
   jpeg_create_compress(&comp);
 
@@ -47,14 +51,9 @@ void save_jpeg(unsigned char *resize_buffer, JSAMPARRAY row_pointers, char *outf
 
 
 void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buffer, char *outfilepath) {
-  /* For each pixel in the resized image, determine the corresponding pixel in the original image.
-   * This involves using the scale factor to calculate the coordinates of the nearest
-   * pixel in the original image.
-   *
-   * Formula: sourceX = int(round( targetX / targetWidth * sourceWidth )) 
-   *          sourceY = int(round( targetY / targetHeight * sourceHeight )) 
-   * */
-
+  /*
+   * Using Nearest Neighbor algorithm for resizing.
+   */
   int source_x;
   int source_y;
   int offset;
@@ -119,27 +118,20 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
     }
   }
 
-  /*
-   * By this point, resize_buffer is filled and we are ready to call
-   * save_jpeg.
-   */
-  save_jpeg(resize_buffer, row_pointers, outfilepath, OUTPUT_WIDTH, OUTPUT_HEIGHT);
-  
+  save_jpeg(resize_buffer, row_pointers, outfilepath, OUTPUT_WIDTH, OUTPUT_HEIGHT); 
 }
 
 
 /* do_read_jpeg will handle reading any data related to our image.
  */
-int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *outfilepath) {
+unsigned char * do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath) {
   struct jpeg_error_mgr jpeg_err;
-  decomp.err = jpeg_std_error(&jpeg_err); /* pointing decomp's 'err' to our jpeg_err struct */
+  decomp.err = jpeg_std_error(&jpeg_err); 
 
-  int i;
   int row_stride;
   unsigned char *full_buffer = NULL;
-  JSAMPARRAY row_pointers = malloc(decomp.output_height * sizeof(unsigned char *)); /* will store pointers of all rows of full_buffer */
+  JSAMPARRAY row_pointers = malloc(decomp.output_height * sizeof(unsigned char *)); 
 
-  /* providing infile pointer to decompression struct */
   jpeg_stdio_src(&decomp, open_file(infilepath));
 
   (void) jpeg_read_header(&decomp, TRUE);
@@ -160,57 +152,43 @@ int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *o
    */
   row_stride = decomp.output_width * decomp.output_components;
 
-  /* allocating big ass buffer to store whole image RGB data
-   */
   full_buffer = malloc(decomp.output_width * decomp.output_height * decomp.output_components);
 
-  /*
-   * DEBUG
-   */
-  printf("full_buffer size: %d\n", decomp.output_width * decomp.output_height * decomp.output_components);
-
+  int i;
   for (i = 0; i < decomp.output_height; i++) {
-    /* full_buffer is a POINTER to a SEQUENCE of bytes. 
-     * full_buffer[0] will refer to our FIRST byte in our allocated buffer to store
-     * a provided image.
-     *
-     * so, in this context- know that full_buffer is an ADDRESS. the way pointer math works
-     * is that when we add an int to a pointer, it will represent the address 'x' amount of 
-     * bytes away from the original address. (where in our case x = (i * row_stride))
-     */
     row_pointers[i] = full_buffer + (i * row_stride);
   }
  
-  /* keep in mind- since our row_pointers is an array of pointers that
-   * are *pointing* at the rows of our full_buffer, we are writing into our full_buffer here.
-   * */
   while (decomp.output_scanline < decomp.output_height) {
     (void) jpeg_read_scanlines(&decomp, &row_pointers[decomp.output_scanline], 1);
   }
 
-  /*
-   * DEBUG
-   */
-  printf("pixel 0: R%d G%d B%d\n", full_buffer[0], full_buffer[1], full_buffer[2]); /* first pixel first row */
-  printf("pixel 3360: R%d G%d B%d\n", full_buffer[10078], full_buffer[10079], full_buffer[10080]); /* last pixel first row */
-
-  (void) resize_jpeg(decomp, full_buffer, outfilepath);
-
-  return 0;
+  return full_buffer;
 }
 
 
-/* need to add desired output size, etc */
-int read_jpeg(char *infile, char *outfile) {
+void read_jpeg(char *desired_size, char *infile, char *outfile) {
   struct jpeg_decompress_struct decomp;
   jpeg_create_decompress(&decomp);
 
-  return do_read_jpeg(decomp, infile, outfile); 
+  unsigned char *input_buffer;
+
+  /* takes decomp struct, and infile */
+  input_buffer = do_read_jpeg(decomp, infile);
+  printf("%p\n", input_buffer);
+
+  resize_jpeg(decomp, input_buffer, outfile);
 }
 
 
 int main(int argc, char *argv[]) {
-  read_jpeg(argv[1], argv[2]);
+  int width;
+  int height;
+
+  parse_size_arg(argv[1], &width, &height);
+  printf("width: %d\nheight: %d\n", width, height);
+
+  read_jpeg(argv[1], argv[2], argv[3]);
 
   return 0;
 }

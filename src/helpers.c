@@ -20,7 +20,6 @@ FILE* open_file(char *filepath) {
   }
 }
 
-
 FILE* write_file(char *filepath) { 
   if (filepath == NULL) {
     printf("write_file - Missing filepath?\n");
@@ -38,3 +37,8 @@ FILE* write_file(char *filepath) {
   }
 }
 
+int parse_size_arg(char *size_str, int *width, int *height) {
+  sscanf(size_str, "%dx%d", width, height);
+
+  return 0;
+}
