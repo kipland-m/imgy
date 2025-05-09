@@ -4,40 +4,38 @@
 #include <jpeglib.h>
 #include "helpers.h"
 
-void save_jpeg(unsigned char *resize_buffer, char *outfilepath,
-                        float resize_width, float resize_height) {
+void save_jpeg(unsigned char *resize_buffer, JSAMPARRAY row_pointers, char *outfilepath,
+                                                float resize_width, float resize_height) {
 
   struct jpeg_compress_struct comp;
-  struct jpeg_error_mgr jpeg_err;
   jpeg_create_compress(&comp);
 
+  struct jpeg_error_mgr jpeg_err;
   comp.err = jpeg_std_error(&jpeg_err); 
-
-  /*
-   * need to write to file
-   */
-  printf("save_jpeg - %s\n", outfilepath);
-  jpeg_stdio_dest(&comp, write_file(outfilepath));
 
   comp.image_height = resize_height;
   comp.image_width = resize_width;
   comp.input_components = 3;
 
+  printf("%p\n", row_pointers[0]);
+
+  jpeg_stdio_dest(&comp, write_file(outfilepath));
+  comp.in_color_space = JCS_RGB; /* ADDING THIS FIXED THE GREEN GOOP */
+
   jpeg_set_defaults(&comp);
   jpeg_start_compress(&comp, TRUE);
 
-    while (comp.next_scanline < comp.image_height) {
+  int i = 0; 
+  while (comp.next_scanline < comp.image_height) {
       /* jpeg_write_scanlines expects an array of pointers to scanlines.
        * Here the array is only one element long, but you could pass
        * more than one scanline at a time if that's more convenient.
-       *
-       *
-       * row_pointer[0] = image_buffer[comp.next_scanline];
-       * (void)jpeg_write_scanlines(&comp, row_pointer, 1);
        */
-      printf("%d\n", comp.next_scanline);
-
+    jpeg_write_scanlines(&comp, &row_pointers[i], 1);
+    i++;
     }
+
+  jpeg_finish_compress(&comp);
 
   /*
    * DEBUG
@@ -61,8 +59,8 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
   int source_y;
   int offset;
   int resize_offset;
-  float OUTPUT_WIDTH = 800.00; /* WIDTH AND HEIGHT HARDCODED FOR DEVELOPMENT PURPOSES */
-  float OUTPUT_HEIGHT = 600.00;
+  float OUTPUT_WIDTH = 400.00; /* WIDTH AND HEIGHT HARDCODED FOR DEVELOPMENT PURPOSES */
+  float OUTPUT_HEIGHT = 400.00;
 
   unsigned char *resize_buffer = NULL;
   int row_stride = OUTPUT_WIDTH * decomp.output_components;
@@ -125,7 +123,7 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
    * By this point, resize_buffer is filled and we are ready to call
    * save_jpeg.
    */
-  save_jpeg(resize_buffer, outfilepath, OUTPUT_WIDTH, OUTPUT_HEIGHT);
+  save_jpeg(resize_buffer, row_pointers, outfilepath, OUTPUT_WIDTH, OUTPUT_HEIGHT);
   
 }
 
