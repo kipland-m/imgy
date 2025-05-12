@@ -37,6 +37,14 @@ FILE* write_file(char *filepath) {
   }
 }
 
+int usage_validation(int argc) {
+  if (argc < 4) {
+    printf("Usage:\t>imgy 800x600 </path/to/sourceImage> <path/to/resizedImage\n");
+
+  }
+  return 0;
+}
+
 int parse_size_arg(char *size_str, int *width, int *height) {
   sscanf(size_str, "%dx%d", width, height);
 
