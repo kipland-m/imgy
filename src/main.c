@@ -4,25 +4,17 @@
 #include <jpeglib.h>
 #include "helpers.h"
 
-typedef struct {
-    int width;
-    int height;
-  } OutputSize;
+void save_jpeg(unsigned char *resize_buffer, JSAMPARRAY row_pointers, char *outfilepath,
+                                                float resize_width, float resize_height) {
 
-/* imgy - Written by Kipland Melton
- *
- * 05/08/25
- */
-
-void save_jpeg(unsigned char *resize_buffer, JSAMPARRAY row_pointers, char *outfilepath, OutputSize size ) {
   struct jpeg_compress_struct comp;
   jpeg_create_compress(&comp);
 
   struct jpeg_error_mgr jpeg_err;
   comp.err = jpeg_std_error(&jpeg_err); 
 
-  comp.image_height = size.height;
-  comp.image_width = size.width;
+  comp.image_height = resize_height;
+  comp.image_width = resize_width;
   comp.input_components = 3;
 
   printf("%p\n", row_pointers[0]);
@@ -37,30 +29,23 @@ void save_jpeg(unsigned char *resize_buffer, JSAMPARRAY row_pointers, char *outf
   while (comp.next_scanline < comp.image_height) {
     jpeg_write_scanlines(&comp, &row_pointers[i], 1);
     i++;
-  }
+    }
 
   jpeg_finish_compress(&comp);
-  jpeg_destroy_compress(&comp);
 }
 
 
-void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buffer, unsigned char *resize_buffer, char *outfilepath) {
-  /*
-   * Using Nearest Neighbor algorithm for resizing.
-   */
+void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buffer, char *outfilepath) {
   int source_x;
   int source_y;
   int offset;
   int resize_offset;
-  float OUTPUT_WIDTH = 400.00; 
+  float OUTPUT_WIDTH = 400.00;  
   float OUTPUT_HEIGHT = 400.00;
 
+  unsigned char *resize_buffer = NULL;
   int row_stride = OUTPUT_WIDTH * decomp.output_components;
   JSAMPARRAY row_pointers = malloc(OUTPUT_HEIGHT * sizeof(unsigned char *)); 
-
-  /*
-   * Precalculate source_x before nested while loop (source_x is row indepenent)
-   */
 
   resize_buffer = malloc(OUTPUT_WIDTH * OUTPUT_HEIGHT * decomp.output_components);
 
@@ -83,43 +68,28 @@ void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buff
     }
   }
 
-  save_jpeg(resize_buffer, row_pointers, outfilepath); 
+  save_jpeg(resize_buffer, row_pointers, outfilepath, OUTPUT_WIDTH, OUTPUT_HEIGHT);
 }
 
 
-/* do_read_jpeg will handle reading any data related to our image.
- */
-unsigned char *do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath) {
+int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *outfilepath) {
   struct jpeg_error_mgr jpeg_err;
   decomp.err = jpeg_std_error(&jpeg_err); 
 
+  int i;
   int row_stride;
   unsigned char *full_buffer = NULL;
-  JSAMPARRAY row_pointers = malloc(decomp.output_height * sizeof(unsigned char *)); 
+  JSAMPARRAY row_pointers = malloc(decomp.output_height * sizeof(unsigned char *));  
 
   jpeg_stdio_src(&decomp, open_file(infilepath));
 
   (void) jpeg_read_header(&decomp, TRUE);
-  /*
-   * DEBUG
-   */
-  printf("%d\n", decomp.image_height);
-  printf("%d\n", decomp.image_width);
-  printf("%d\n", decomp.num_components); 
-
   (void) jpeg_start_decompress(&decomp);
 
-  /* row_stride = the length of a row of pixels in our image.
-   * a pixel will be represented by 3 sets of digits (R,G,B)
-   *
-   * ex. MoonKilledCthun.jpg (3360x2100)
-   * total amount of pixels in row_stride: 3360 * 3 = 10080
-   */
   row_stride = decomp.output_width * decomp.output_components;
 
   full_buffer = malloc(decomp.output_width * decomp.output_height * decomp.output_components);
 
-  int i;
   for (i = 0; i < decomp.output_height; i++) {
     row_pointers[i] = full_buffer + (i * row_stride);
   }
@@ -128,24 +98,23 @@ unsigned char *do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepa
     (void) jpeg_read_scanlines(&decomp, &row_pointers[decomp.output_scanline], 1);
   }
 
-  return full_buffer;
+  (void) resize_jpeg(decomp, full_buffer, outfilepath);
+
+  return 0;
+}
+
+
+int read_jpeg(char *infile, char *outfile) {
+  struct jpeg_decompress_struct decomp;
+  jpeg_create_decompress(&decomp);
+
+  return do_read_jpeg(decomp, infile, outfile); 
 }
 
 
 int main(int argc, char *argv[]) {
-  usage_validation(argc);
-
-  OutputSize size;
-  parse_size_arg(argv[1], &size.width, &size.height);
-
-  struct jpeg_decompress_struct decomp;
-  jpeg_create_decompress(&decomp);
-  unsigned char *input_buffer = do_read_jpeg(decomp, argv[2]);
-
-  unsigned char *resize_buffer = NULL;
-  JSAMPARRAY row_pointers = NULL;
-
-  resize_jpeg(decomp, input_buffer, resize_buffer, argv[4]);
+  read_jpeg(argv[1], argv[2]);
 
   return 0;
 }
+
