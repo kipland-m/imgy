@@ -17,21 +17,18 @@ void save_jpeg(unsigned char *resize_buffer, JSAMPARRAY row_pointers, char *outf
   comp.image_width = resize_width;
   comp.input_components = 3;
 
-  printf("%p\n", row_pointers[0]);
-
   jpeg_stdio_dest(&comp, write_file(outfilepath));
   comp.in_color_space = JCS_RGB; 
 
   jpeg_set_defaults(&comp);
   jpeg_start_compress(&comp, TRUE);
 
-  int i = 0; 
   while (comp.next_scanline < comp.image_height) {
-    jpeg_write_scanlines(&comp, &row_pointers[i], 1);
-    i++;
-    }
+    jpeg_write_scanlines(&comp, &row_pointers[comp.next_scanline], 1);
+  }
 
   jpeg_finish_compress(&comp);
+  jpeg_destroy_compress(&comp);
 }
 
 

@@ -6,27 +6,15 @@ imgy is my C-based command line tool to provide a simple, effective way to resiz
 Here's what is currently on my plate to add/fix/improve on within *imgy*
 
 - [ ] Create first 'release' for first working version and begin adding new features using branching
+- [ ] Once an official build/release is made, work on uploading to apt-get
 - [ ] Improve command line interaction (allow user to input size, optional flags)
 - [ ] Clean up comment walls of text
+- [ ] Implement feature to allow users to keep aspect ratio (i.e. only giving one dimension)
 - [ ] Start brainstorming on adding support for PNGs
 - [ ] Start brainstorming on adding additional resizing algorithms (allow users to select which is used via flags)
 
 ## Example usage (as of now):
 - Compiling
-
-	\>`make`
-
-	If you have access/use `make` on your system, simply utilize the included makefile in this repo.
-
-- Running the program and real usage
-
-	\>`./bin/imgy </Path/To/SourceImage.jpg> </NameOfResizedFile.jpg>`
-
-## End goal example usage:
-Example usage as follows:
-
-	> imgy /pictures/KipNaked.png 600x800
-	KipNaked.png has been resized to 600x800.
 
 We could add some flags in there:
 
@@ -73,22 +61,23 @@ How should we build this project? Well, it's C. So, thank god, that we don't hav
 	- read_jpeg()
 
 - int read_jpeg(char \*infile, char \*\*outfile)
-	This a sort of *main* function for getting our jpeg data. This will handle the definition and initialization of our *decomp* struct. It will pass this struct to our *do_read_jpeg* which just feels like a total badass function name out of the like 90s or something.
+	This a sort of *main* function for getting our jpeg data. This will handle the definition and initialization of our `decomp` struct. It will pass this struct to our `do_read_jpeg` which just feels like a total badass function name out of the like 90s or something.
 
 - int do_read_jpeg(struct jpeg_decompress_struct decomp, char \*infilepath, char \*outfilepath)
-	This is where the real meat and taters is of our progress so far. This handles setting up our error struct, actually opening the image provided and reading the header data, pixel data, etc.
-		
+	This is where the real meat and taters is of our progress so far. This handles setting up our error struct, actually opening the image provided and reading the header data, pixel data, etc.	
 
-- **TO IMPLEMENT** int resize_jpeg()
+- void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char \*input_buffer, char \*outfilepath) 
 	We can expect to either call this from do_read_jpeg, or, somehow handle passing the buffer to it so then it can manipulate and resize it in that function.
 	This function will contain our crazy nearest neighbor algorithm for resizing.
 	
-- int save_jpeg(unsigned char \*resize_buffer, char \*outfilepath, float resize_width, float resize_height)
+- int save_jpeg(unsigned char \*resize_buffer, JSAMPARRAY row_pointers, char \*outfilepath, float resize_width, float resize_height)
 	This is where the real meat and taters is of our progress so far. This handles setting up our error struct, actually opening the image provided and reading the header data, pixel data, etc.
+
 ## Documenting Progress
 Making progress
-	So far, I have created a function to read a JPEG. This initializes a struct (decompression struct) with jpeg_create_decompress. I have some basic error handling that will let you know if our code found the file you provided. Then I start the decompression process.	
-	Next we need to create a buffer and write the output of the decompression process to this buffer. 
+
+So far, I have created a function to read a JPEG. This initializes a struct (decompression struct) with jpeg_create_decompress. I have some basic error handling that will let you know if our code found the file you provided. Then I start the decompression process.	
+Next we need to create a buffer and write the output of the decompression process to this buffer. 
 
 I have made the full buffer by using:
 
@@ -154,4 +143,5 @@ We are doing this for 3 positions each iteration because we have 3 RGB (1 red, 1
 Now is time to give our new resize buffer over to our save_jpeg function. Now, we have achieved a resized image. But only in raw pixel data form. We are going to pass this data into our save_jpeg function that will handle writing the data into a `jpeg_compress_struct` much like we pass the source image into a `jpeg_decompress_struct`. We are initializing this struct, creating a new error managing struct for compression, and loading it up with the header data like `resize_height, resize_width` and the `input_components`. 
 
 After some config telling our struct about our image, we use `jpeg_start_compress` and then implement a while loop to write our scanlines into our struct. Finally, we use `jpeg_finish_compress` to get our image!
+
 
