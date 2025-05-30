@@ -1,11 +1,11 @@
 #include "helpers.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
 #include <jpeglib.h>
 
 FILE* open_file(char *filepath) { 
   if (filepath == NULL) {
-    printf("open_file - Missing filepath?\n");
     exit(1);
   }
 
@@ -39,7 +39,7 @@ FILE* write_file(char *filepath) {
 
 int usage_validation(int argc) {
   if (argc < 4) {
-    printf("Usage:\t>imgy 800x600 </path/to/sourceImage> <path/to/resizedImage\n");
+    printf("Usage:\timgy 800x600 </path/to/sourceImage> <path/to/resizedImage\n");
 
   }
   return 0;

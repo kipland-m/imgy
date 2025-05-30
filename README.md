@@ -54,23 +54,27 @@ We create a buffer that will be capable of holding all the pixels in our image. 
 
 How should we build this project? Well, it's C. So, thank god, that we don't have to deal with stupid OOP principles. We are going to have a couple files that have a variety of functions that we will try our best to have clear, defined purposes. So what will these functions look like?
 
-* int main(int main(int argc, char \*argv[])
+* `int main(int main(int argc, char \*argv[])`
+
 	this is our main function. it will handle taking our command line arguments. we can expect to handle our input errors here, and handle supplying all the functions that actually make up our program their necessary data.
 
 	Currently it calls:
 	- read_jpeg()
 
-- int read_jpeg(char \*infile, char \*\*outfile)
+- `int read_jpeg(char \*infile, char \*\*outfile)`
+
 	This a sort of *main* function for getting our jpeg data. This will handle the definition and initialization of our `decomp` struct. It will pass this struct to our `do_read_jpeg` which just feels like a total badass function name out of the like 90s or something.
 
-- int do_read_jpeg(struct jpeg_decompress_struct decomp, char \*infilepath, char \*outfilepath)
+- `int do_read_jpeg(struct jpeg_decompress_struct decomp, char \*infilepath, char \*outfilepath)`
+
 	This is where the real meat and taters is of our progress so far. This handles setting up our error struct, actually opening the image provided and reading the header data, pixel data, etc.	
 
-- void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char \*input_buffer, char \*outfilepath) 
-	We can expect to either call this from do_read_jpeg, or, somehow handle passing the buffer to it so then it can manipulate and resize it in that function.
-	This function will contain our crazy nearest neighbor algorithm for resizing.
+- `void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char \*input_buffer, char \*outfilepath)`
+
+	We can expect to either call this from do_read_jpeg, or, somehow handle passing the buffer to it so then it can manipulate and resize it in that function. This function will contain our crazy nearest neighbor algorithm for resizing.
 	
-- int save_jpeg(unsigned char \*resize_buffer, JSAMPARRAY row_pointers, char \*outfilepath, float resize_width, float resize_height)
+- `int save_jpeg(unsigned char \*resize_buffer, JSAMPARRAY row_pointers, char \*outfilepath, float resize_width, float resize_height)`
+
 	This is where the real meat and taters is of our progress so far. This handles setting up our error struct, actually opening the image provided and reading the header data, pixel data, etc.
 
 ## Documenting Progress
