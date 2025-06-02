@@ -38,7 +38,7 @@ FILE* write_file(char *filepath) {
 }
 
 int usage_validation(int argc) {
-  if (argc < 4) {
+  if (argc < 4 || argc > 4) {
     printf("Usage:\timgy 800x600 </path/to/sourceImage> <path/to/resizedImage\n");
 
   }
