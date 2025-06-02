@@ -39,7 +39,7 @@ void save_jpeg(unsigned char *resize_buffer,
 }
 
 
-void resize_jpeg(struct jpeg_decompress_struct decomp,
+void resize_jpeg(struct jpeg_decompress_struct *decomp,
                   unsigned char *input_buffer, char *outfilepath,
                   int arg_width, int arg_height) {
 
@@ -55,25 +55,23 @@ void resize_jpeg(struct jpeg_decompress_struct decomp,
   float source_x_array[OUTPUT_WIDTH];
 
   unsigned char *resize_buffer = NULL;
-  int row_stride = OUTPUT_WIDTH * decomp.output_components;
+  int row_stride = OUTPUT_WIDTH * decomp->output_components;
   JSAMPARRAY row_pointers = malloc(OUTPUT_HEIGHT * sizeof(unsigned char *)); 
 
-  resize_buffer = malloc(OUTPUT_WIDTH * OUTPUT_HEIGHT * decomp.output_components);
-
-  printf("%d", decomp.output_width);
+  resize_buffer = malloc(OUTPUT_WIDTH * OUTPUT_HEIGHT * decomp->output_components);
 
   for (i = 0; i < OUTPUT_WIDTH; i++) {
-    source_x_array[i] = round((float)i / OUTPUT_WIDTH * decomp.output_width);
-
+    source_x_array[i] = round((float)i / OUTPUT_WIDTH * decomp->output_width);
+    printf("%f\n", source_x_array[i]);
   }
 
   for (i = 0; i < OUTPUT_HEIGHT; i++) {
     row_pointers[i] = resize_buffer + (i * row_stride);
 
-    source_y = round((float)i / OUTPUT_HEIGHT * decomp.output_height); 
+    source_y = round((float)i / OUTPUT_HEIGHT * decomp->output_height); 
 
     for (j = 0; j < OUTPUT_WIDTH; j++) {
-      offset = source_y * decomp.output_width * 3 + source_x_array[j] * 3;
+      offset = source_y * decomp->output_width * 3 + source_x_array[j] * 3;
       resize_offset = i * row_stride + j * 3;
 
       resize_buffer[resize_offset] = input_buffer[offset];
@@ -135,11 +133,9 @@ int main(int argc, char *argv[]) {
   parse_size_arg(argv[1], &arg_dimensions.width, &arg_dimensions.height);
 
   (void) do_read_jpeg(&decomp, argv[2], &full_buffer);
-  /*
-  (void) resize_jpeg(decomp, full_buffer, argv[3], arg_dimensions.width, arg_dimensions.height);
-*/
+  (void) resize_jpeg(&decomp, full_buffer, argv[3], arg_dimensions.width, arg_dimensions.height);
 
-  printf("%d", decomp.output_width);
+  printf("%d\n", decomp.output_width);
 
   printf("pixel 0: R%d G%d B%d\n", full_buffer[0], full_buffer[1], full_buffer[2]); /* first pixel first row */
   printf("pixel 3360: R%d G%d B%d\n", full_buffer[10078], full_buffer[10079], full_buffer[10080]); /* last pixel first row */
