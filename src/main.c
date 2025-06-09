@@ -11,8 +11,10 @@ struct Dimensions {
   };
 
 void save_jpeg(unsigned char *resize_buffer,
-                JSAMPARRAY row_pointers, char *outfilepath,
-                float resize_width, float resize_height) {
+                          char *outfilepath,
+                          JSAMPARRAY row_pointers,
+                          int arg_width, 
+                          int arg_height) {
 
   struct jpeg_compress_struct comp;
   jpeg_create_compress(&comp);
@@ -20,8 +22,8 @@ void save_jpeg(unsigned char *resize_buffer,
   struct jpeg_error_mgr jpeg_err;
   comp.err = jpeg_std_error(&jpeg_err); 
 
-  comp.image_height = resize_height;
-  comp.image_width = resize_width;
+  comp.image_height = arg_height;
+  comp.image_width = arg_width; 
   comp.input_components = 3;
 
   jpeg_stdio_dest(&comp, write_file(outfilepath));
@@ -40,39 +42,37 @@ void save_jpeg(unsigned char *resize_buffer,
 
 
 void resize_jpeg(struct jpeg_decompress_struct *decomp,
-                  unsigned char *input_buffer,
-                  char *outfilepath,
-                  int arg_width, 
-                  int arg_height) {
-
-  int OUTPUT_WIDTH = arg_width;  
-  int OUTPUT_HEIGHT = arg_height;
-
+                            unsigned char *input_buffer,
+                            JSAMPARRAY *row_pointers,
+                            int arg_width, 
+                            int arg_height) {
   int i;
   int j;
   float source_y;
+  int source_x;
   int offset;
   int resize_offset;
-  float source_x_array[OUTPUT_WIDTH];
+  float source_x_array[arg_width];
 
   unsigned char *resize_buffer = NULL;
-  int row_stride = OUTPUT_WIDTH * decomp->output_components;
-  JSAMPARRAY row_pointers = malloc(OUTPUT_HEIGHT * sizeof(unsigned char *)); 
+  int row_stride = arg_width * decomp->output_components;
+  *row_pointers = malloc(arg_height * sizeof(unsigned char *)); 
 
-  resize_buffer = malloc(OUTPUT_WIDTH * OUTPUT_HEIGHT * decomp->output_components);
+  resize_buffer = malloc(arg_width * arg_height * decomp->output_components);
 
-  for (i = 0; i < OUTPUT_WIDTH; i++) {
-    source_x_array[i] = round((float)i / OUTPUT_WIDTH * decomp->output_width);
-    printf("%f\n", source_x_array[i]);
+  for (i = 0; i < arg_width; i++) {
+    source_x_array[i] = (int)round((float)i / arg_width * decomp->output_width);
   }
 
-  for (i = 0; i < OUTPUT_HEIGHT; i++) {
-    row_pointers[i] = resize_buffer + (i * row_stride);
+  for (i = 0; i < arg_height; i++) {
+    (*row_pointers)[i] = resize_buffer + (i * row_stride);
 
-    source_y = round((float)i / OUTPUT_HEIGHT * decomp->output_height); 
+    source_y = (int)round((float)i / arg_height * decomp->output_height); 
+    printf("%f\n", source_y);
 
-    for (j = 0; j < OUTPUT_WIDTH; j++) {
-      offset = source_y * decomp->output_width * 3 + source_x_array[j] * 3;
+    for (j = 0; j < arg_width; j++) {
+      source_x = (int)round((float)j / arg_width * decomp->output_width); 
+      offset = source_y * decomp->output_width * 3 + source_x * 3;
       resize_offset = i * row_stride + j * 3;
 
       resize_buffer[resize_offset] = input_buffer[offset];
@@ -80,13 +80,12 @@ void resize_jpeg(struct jpeg_decompress_struct *decomp,
       resize_buffer[resize_offset + 2] = input_buffer[offset + 2];
     }
   }
-
-  save_jpeg(resize_buffer, row_pointers, outfilepath, OUTPUT_WIDTH, OUTPUT_HEIGHT);
 }
 
 
 void do_read_jpeg(struct jpeg_decompress_struct *decomp,
-                  char *infilepath, unsigned char **full_buffer) {
+                                        char *infilepath, 
+                                        unsigned char **full_buffer) {
 
   struct jpeg_error_mgr jpeg_err;
   decomp->err = jpeg_std_error(&jpeg_err); 
@@ -125,16 +124,18 @@ int main(int argc, char *argv[]) {
   
   struct Dimensions arg_dimensions;
   struct jpeg_decompress_struct decomp;
-
   jpeg_create_decompress(&decomp);
 
   unsigned char *full_buffer = NULL;
+  unsigned char *resize_buffer = NULL;
+  JSAMPARRAY row_pointers = NULL; 
   
   usage_validation(argc);
   parse_size_arg(argv[1], &arg_dimensions.width, &arg_dimensions.height);
 
   (void) do_read_jpeg(&decomp, argv[2], &full_buffer);
-  (void) resize_jpeg(&decomp, full_buffer, argv[3], arg_dimensions.width, arg_dimensions.height);
+  (void) resize_jpeg(&decomp, full_buffer, &row_pointers, arg_dimensions.width, arg_dimensions.height);
+  (void) save_jpeg(resize_buffer, argv[3], row_pointers, arg_dimensions.width, arg_dimensions.height);
 
   /*
    * Next, we need to call save_jpeg(), this will actually write the new resized file
