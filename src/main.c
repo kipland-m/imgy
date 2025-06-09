@@ -135,6 +135,10 @@ int main(int argc, char *argv[]) {
   (void) do_read_jpeg(&decomp, argv[2], &full_buffer);
   (void) resize_jpeg(&decomp, full_buffer, argv[3], arg_dimensions.width, arg_dimensions.height);
 
+  /*
+   * Next, we need to call save_jpeg(), this will actually write the new resized file
+   */
+
   printf("%d\n", decomp.output_width);
 
   printf("pixel 0: R%d G%d B%d\n", full_buffer[0], full_buffer[1], full_buffer[2]); /* first pixel first row */
