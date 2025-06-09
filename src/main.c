@@ -40,15 +40,16 @@ void save_jpeg(unsigned char *resize_buffer,
 
 
 void resize_jpeg(struct jpeg_decompress_struct *decomp,
-                  unsigned char *input_buffer, char *outfilepath,
-                  int arg_width, int arg_height) {
+                  unsigned char *input_buffer,
+                  char *outfilepath,
+                  int arg_width, 
+                  int arg_height) {
 
-  int OUTPUT_WIDTH = 800;  
-  int OUTPUT_HEIGHT = 600;
+  int OUTPUT_WIDTH = arg_width;  
+  int OUTPUT_HEIGHT = arg_height;
 
   int i;
   int j;
-  float source_x;
   float source_y;
   int offset;
   int resize_offset;
@@ -60,12 +61,10 @@ void resize_jpeg(struct jpeg_decompress_struct *decomp,
 
   resize_buffer = malloc(OUTPUT_WIDTH * OUTPUT_HEIGHT * decomp->output_components);
 
-  /*
   for (i = 0; i < OUTPUT_WIDTH; i++) {
     source_x_array[i] = round((float)i / OUTPUT_WIDTH * decomp->output_width);
     printf("%f\n", source_x_array[i]);
   }
-  */
 
   for (i = 0; i < OUTPUT_HEIGHT; i++) {
     row_pointers[i] = resize_buffer + (i * row_stride);
