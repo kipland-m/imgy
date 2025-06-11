@@ -69,11 +69,14 @@ int resize_jpeg(struct jpeg_decompress_struct *decomp,
   for (i = 0; i < arg_height; i++) {
     (*row_pointers)[i] = *resize_buffer + (i * row_stride);
 
-    source_y = (int)round((float)i / arg_height * decomp->output_height); 
+    source_y = (int)((float)i * decomp->output_height / arg_height);
+    if (source_y >= decomp->output_height) source_y = decomp->output_height - 1;
     printf("%f\n", source_y);
 
     for (j = 0; j < arg_width; j++) {
-      source_x = (int)round((float)j / arg_width * decomp->output_width); 
+      source_x = (int)((float)j * decomp->output_width / arg_width);
+      if (source_x >= decomp->output_width) source_x = decomp->output_width - 1;
+
       offset = source_y * decomp->output_width * 3 + source_x * 3;
       resize_offset = i * row_stride + j * 3;
 
