@@ -9,6 +9,7 @@ Here's what is currently on my plate to add/fix/improve on within *imgy*
 	- [x] Allow user to input custom size
 	- [ ] Add logic for optional flags
 - [x] Clean up comment walls of text
+- [ ] Create random number generator for resized image names. (default tool usage would not require path for resized, will be a `-o` flag in the future to specify output)
 - [ ] Implement feature to allow users to keep aspect ratio (i.e. only giving one dimension)
 - [ ] Start brainstorming on adding support for PNGs
 - [ ] Start brainstorming on adding additional resizing algorithms (allow users to select which is used via flags)
@@ -16,11 +17,17 @@ Here's what is currently on my plate to add/fix/improve on within *imgy*
 - [ ] Once an official build/release is made, work on uploading to apt-get
 
 ## Example usage (as of now):
-- Compiling
+
+**Compiling**
+	Using the provided `makefile`, run `make`
+
+**Usage**
+
+	>./bin/imgy 1920x1080 Pictures/My-Cat-Bubbles.jpg Path/To/Resized.jpg
 
 We could add some flags in there:
 
-	> imgy /pics/CuteBinky.jpg 400x400 -o BinkyResized.jpg
+	> imgy 400x400 /pics/CuteBinky.jpg -o BinkyResized.jpg
 	Made a resized copy of CuteBinky.jpg at /pics/BinkyResized.jpg
 	
 	> imgy /pics/CuteBinky.jpg 400x400 -c
