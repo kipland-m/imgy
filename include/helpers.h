@@ -4,5 +4,7 @@
 
 FILE* open_file(char *filepath);
 FILE* write_file(char *filepath);
+int parse_size_arg(char *size_str, int *width, int *height);
+int usage_validation(int argc);
 
 #endif
