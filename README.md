@@ -1,7 +1,14 @@
 # imgy - command line image resizing tool
 
 imgy is my C-based command line tool to provide a simple, effective way to resize images through the command line. This is a tool with developers in mind. 
+## Example usage (as of now):
 
+**Compiling**
+	Using the provided `makefile`, run `make`
+
+**Usage**
+
+	>./bin/imgy 1920x1080 Pictures/My-Cat-Bubbles.jpg Path/To/Resized.jpg
 ### Features to implement!
 Here's what is currently on my plate to add/fix/improve on within *imgy*
 
@@ -16,15 +23,7 @@ Here's what is currently on my plate to add/fix/improve on within *imgy*
 - [ ] Create first 'release' for first working version and begin adding new features using branching
 - [ ] Once an official build/release is made, work on uploading to apt-get
 
-## Example usage (as of now):
-
-**Compiling**
-	Using the provided `makefile`, run `make`
-
-**Usage**
-
-	>./bin/imgy 1920x1080 Pictures/My-Cat-Bubbles.jpg Path/To/Resized.jpg
-
+## Example future usage
 We could add some flags in there:
 
 	> imgy 400x400 /pics/CuteBinky.jpg -o BinkyResized.jpg
@@ -33,6 +32,7 @@ We could add some flags in there:
 	> imgy /pics/CuteBinky.jpg 400x400 -c
 	Made a resized copy of CuteBinky.jpg (CuteBinky1.jpg)  
   
+## The big picture
 How will we be doing the resizing?
 
 Initially we will be testing using only jpegs, but safe to assume for now that pngs will follow a similar process
@@ -43,7 +43,6 @@ First, we will be creating a struct with *jpeg_decompress_struct* hold things re
 
 Then, we will begin decompressing the image and reading the pixel lines of the image. Now, with access to pixel data, we will be able to load it up in a buffer then which we can start doing some resizing magic from.
 
-## The big picture
 Really, our program revolves around a few things:
 - The decompression struct provided by libjpeg
 - Our big ole buffer (stores all of our pixel data!)
