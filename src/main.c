@@ -1,3 +1,9 @@
+/* Kipland Melton
+ * 06/12/2025
+ *
+ * imgy - a command line image resizer in c
+ */
+
 #include "helpers.h"
 #include <stdio.h>
 #include <math.h>
@@ -123,8 +129,8 @@ int do_read_jpeg(struct jpeg_decompress_struct *decomp,
 }
 
 int main(int argc, char *argv[]) {
-  /*
-   * The 3 main functions that make up the program:
+  /* The 3 main functions that make up the program
+   *
    * do_read_jpeg:
    *    *decomp, *infilepath, **full_buffer 
    * resize_jpeg:
@@ -137,10 +143,14 @@ int main(int argc, char *argv[]) {
   struct jpeg_decompress_struct decomp;
   jpeg_create_decompress(&decomp);
 
+  /* We will allocate these when we need them later. 
+   */
   unsigned char *full_buffer = NULL;
   unsigned char *resize_buffer = NULL;
   JSAMPARRAY row_pointers = NULL; 
   
+  /* Command line input validation
+   */
   usage_validation(argc);
   parse_size_arg(argv[1], &arg_dimensions.width, &arg_dimensions.height);
 
