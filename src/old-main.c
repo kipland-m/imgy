@@ -4,8 +4,7 @@
 #include <jpeglib.h>
 #include "helpers.h"
 
-void save_jpeg(unsigned char *resize_buffer, JSAMPARRAY row_pointers, char *outfilepath,
-                                                float resize_width, float resize_height) {
+void save_jpeg(unsigned char *resize_buffer, JSAMPARRAY row_pointers, char *outfilepath, float resize_width, float resize_height) {
 
   struct jpeg_compress_struct comp;
   jpeg_create_compress(&comp);

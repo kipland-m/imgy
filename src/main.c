@@ -52,7 +52,7 @@ int resize_jpeg(struct jpeg_decompress_struct *decomp,
 
   int i;
   int j;
-  float source_y;
+  int source_y;
   int source_x;
   int offset;
   int resize_offset;
@@ -71,7 +71,6 @@ int resize_jpeg(struct jpeg_decompress_struct *decomp,
 
     source_y = (int)((float)i * decomp->output_height / arg_height);
     if (source_y >= decomp->output_height) source_y = decomp->output_height - 1;
-    printf("%f\n", source_y);
 
     for (j = 0; j < arg_width; j++) {
       source_x = (int)((float)j * decomp->output_width / arg_width);
