@@ -13,8 +13,10 @@ struct Dimensions {
 int save_jpeg(unsigned char *resize_buffer,
                           char *outfilepath,
                           JSAMPARRAY row_pointers,
-                          int arg_width, 
-                          int arg_height) {
+                          struct Dimensions *arg_dimensions) {
+
+  int arg_width = arg_dimensions->width;
+  int arg_height = arg_dimensions->height;
 
   struct jpeg_compress_struct comp;
   jpeg_create_compress(&comp);
@@ -124,11 +126,11 @@ int main(int argc, char *argv[]) {
   /*
    * The 3 main functions that make up the program:
    * do_read_jpeg:
-   *    struct jpeg_decompress_struct *decomp, char *infilepath, unsigned char **full_buffer 
+   *    *decomp, *infilepath, **full_buffer 
    * resize_jpeg:
-   *    struct jpeg_decompress_struct *decomp, unsigned char **input_buffer, char *outfilepath
+   *    *decomp, **input_buffer, *row_pointers, **resize_buffer, *arg_dimensions
    * save_jpeg:
-   *    unsigned char *resize_buffer, JSAMPARRAY row_pointers, char *outfilepath, float resize_width, float resize_height
+   *    *resize_buffer, *outfilepath, *row_pointers, *arg_dimensions
    */
   
   struct Dimensions arg_dimensions;
@@ -144,7 +146,7 @@ int main(int argc, char *argv[]) {
 
   (void) do_read_jpeg(&decomp, argv[2], &full_buffer);
   (void) resize_jpeg(&decomp, full_buffer, &row_pointers, &resize_buffer, &arg_dimensions);
-  (void) save_jpeg(resize_buffer, argv[3], row_pointers, arg_dimensions.width, arg_dimensions.height);
+  (void) save_jpeg(resize_buffer, argv[3], row_pointers, &arg_dimensions);
 
   return (0);
 }
