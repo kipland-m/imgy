@@ -47,8 +47,7 @@ int resize_jpeg(struct jpeg_decompress_struct *decomp,
                             unsigned char *input_buffer,
                             JSAMPARRAY *row_pointers,
                             unsigned char **resize_buffer,
-                            int arg_width, 
-                            int arg_height) {
+                            struct Dimensions *arg_dimensions) {
 
   int i;
   int j;
@@ -56,6 +55,8 @@ int resize_jpeg(struct jpeg_decompress_struct *decomp,
   int source_x;
   int offset;
   int resize_offset;
+  int arg_width = arg_dimensions->width;
+  int arg_height = arg_dimensions->height;
   float source_x_array[arg_width];
 
   int row_stride = arg_width * decomp->output_components;
@@ -123,9 +124,9 @@ int main(int argc, char *argv[]) {
   /*
    * The 3 main functions that make up the program:
    * do_read_jpeg:
-   *    struct jpeg_decompress_struct decomp, char *infilepath, char *outfilepath
+   *    struct jpeg_decompress_struct *decomp, char *infilepath, unsigned char **full_buffer 
    * resize_jpeg:
-   *    struct jpeg_decompress_struct decomp, unsigned char *input_buffer, char *outfilepath
+   *    struct jpeg_decompress_struct *decomp, unsigned char **input_buffer, char *outfilepath
    * save_jpeg:
    *    unsigned char *resize_buffer, JSAMPARRAY row_pointers, char *outfilepath, float resize_width, float resize_height
    */
@@ -142,11 +143,8 @@ int main(int argc, char *argv[]) {
   parse_size_arg(argv[1], &arg_dimensions.width, &arg_dimensions.height);
 
   (void) do_read_jpeg(&decomp, argv[2], &full_buffer);
-  (void) resize_jpeg(&decomp, full_buffer, &row_pointers, &resize_buffer, arg_dimensions.width, arg_dimensions.height);
+  (void) resize_jpeg(&decomp, full_buffer, &row_pointers, &resize_buffer, &arg_dimensions);
   (void) save_jpeg(resize_buffer, argv[3], row_pointers, arg_dimensions.width, arg_dimensions.height);
-
-  printf("pixel 0: R%d G%d B%d\n", full_buffer[0], full_buffer[1], full_buffer[2]); /* first pixel first row */
-  printf("pixel 3360: R%d G%d B%d\n", full_buffer[10078], full_buffer[10079], full_buffer[10080]); /* last pixel first row */
 
   return (0);
 }
