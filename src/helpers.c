@@ -4,6 +4,10 @@
 #include <unistd.h>
 #include <jpeglib.h>
 
+/*
+ * 	i love you and binky and bubble sso much ::))
+ */
+
 FILE* open_file(char *filepath) { 
   if (filepath == NULL) {
     exit(1);

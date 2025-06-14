@@ -65,7 +65,7 @@ int resize_jpeg(struct jpeg_decompress_struct *decomp,
   int resize_offset;
   int arg_width = arg_dimensions->width;
   int arg_height = arg_dimensions->height;
-  float source_x_array[arg_width];
+  float source_x_array[arg_width]; /* Unlike source_y, we do not need to calculate*/
 
   int row_stride = arg_width * decomp->output_components;
   *row_pointers = malloc(arg_height * sizeof(unsigned char *)); 
@@ -143,7 +143,7 @@ int main(int argc, char *argv[]) {
   struct jpeg_decompress_struct decomp;
   jpeg_create_decompress(&decomp);
 
-  /* We will allocate these when we need them later. 
+  /* We will initialize these when we need them later. 
    */
   unsigned char *full_buffer = NULL;
   unsigned char *resize_buffer = NULL;
