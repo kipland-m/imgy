@@ -1,29 +1,38 @@
 # imgy - command line image resizing tool
 
 imgy is my C-based command line tool to provide a simple, effective way to resize images through the command line. This is a tool with developers in mind. 
+## Example usage (as of now):
 
+**Compiling**
+	Using the provided `makefile`, run `make`
+
+**Usage**
+
+	>./bin/imgy 1920x1080 Pictures/My-Cat-Bubbles.jpg Path/To/Resized.jpg
 ### Features to implement!
 Here's what is currently on my plate to add/fix/improve on within *imgy*
 
-- [ ] Create first 'release' for first working version and begin adding new features using branching
-- [ ] Once an official build/release is made, work on uploading to apt-get
 - [ ] Improve command line interaction (allow user to input size, optional flags)
-- [ ] Clean up comment walls of text
+	- [x] Allow user to input custom size
+	- [ ] Add logic for optional flags
+- [x] Clean up comment walls of text
+- [ ] Create random number generator for resized image names. (default tool usage would not require path for resized, will be a `-o` flag in the future to specify output)
 - [ ] Implement feature to allow users to keep aspect ratio (i.e. only giving one dimension)
 - [ ] Start brainstorming on adding support for PNGs
 - [ ] Start brainstorming on adding additional resizing algorithms (allow users to select which is used via flags)
+- [ ] Create first 'release' for first working version and begin adding new features using branching
+- [ ] Once an official build/release is made, work on uploading to apt-get
 
-## Example usage (as of now):
-- Compiling
-
+## Example future usage
 We could add some flags in there:
 
-	> imgy /pics/CuteBinky.jpg 400x400 -o BinkyResized.jpg
+	> imgy 400x400 /pics/CuteBinky.jpg -o BinkyResized.jpg
 	Made a resized copy of CuteBinky.jpg at /pics/BinkyResized.jpg
 	
 	> imgy /pics/CuteBinky.jpg 400x400 -c
 	Made a resized copy of CuteBinky.jpg (CuteBinky1.jpg)  
   
+## The big picture
 How will we be doing the resizing?
 
 Initially we will be testing using only jpegs, but safe to assume for now that pngs will follow a similar process
@@ -34,7 +43,6 @@ First, we will be creating a struct with *jpeg_decompress_struct* hold things re
 
 Then, we will begin decompressing the image and reading the pixel lines of the image. Now, with access to pixel data, we will be able to load it up in a buffer then which we can start doing some resizing magic from.
 
-## The big picture
 Really, our program revolves around a few things:
 - The decompression struct provided by libjpeg
 - Our big ole buffer (stores all of our pixel data!)
@@ -54,30 +62,30 @@ We create a buffer that will be capable of holding all the pixels in our image. 
 
 How should we build this project? Well, it's C. So, thank god, that we don't have to deal with stupid OOP principles. We are going to have a couple files that have a variety of functions that we will try our best to have clear, defined purposes. So what will these functions look like?
 
-* `int main(int main(int argc, char \*argv[])`
+* `int main(int main(int argc, char *argv[])`
 
-	this is our main function. it will handle taking our command line arguments. we can expect to handle our input errors here, and handle supplying all the functions that actually make up our program their necessary data.
+	This is our main function. it will handle taking our command line arguments. we can expect to handle our input errors here, and handle supplying all the functions that actually make up our program their necessary data.
 
 	Currently it calls:
 	- read_jpeg()
 
-- `int read_jpeg(char \*infile, char \*\*outfile)`
+- `int read_jpeg(char *infile, char *outfile)`
 
 	This a sort of *main* function for getting our jpeg data. This will handle the definition and initialization of our `decomp` struct. It will pass this struct to our `do_read_jpeg` which just feels like a total badass function name out of the like 90s or something.
 
-- `int do_read_jpeg(struct jpeg_decompress_struct decomp, char \*infilepath, char \*outfilepath)`
+- `int do_read_jpeg(struct jpeg_decompress_struct decomp, char *infilepath, char *outfilepath)`
 
 	This is where the real meat and taters is of our progress so far. This handles setting up our error struct, actually opening the image provided and reading the header data, pixel data, etc.	
 
-- `void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char \*input_buffer, char \*outfilepath)`
+- `void resize_jpeg(struct jpeg_decompress_struct decomp, unsigned char *input_buffer, char *outfilepath)`
 
 	We can expect to either call this from do_read_jpeg, or, somehow handle passing the buffer to it so then it can manipulate and resize it in that function. This function will contain our crazy nearest neighbor algorithm for resizing.
 	
-- `int save_jpeg(unsigned char \*resize_buffer, JSAMPARRAY row_pointers, char \*outfilepath, float resize_width, float resize_height)`
+- `int save_jpeg(unsigned char *resize_buffer, JSAMPARRAY row_pointers, char *outfilepath, float resize_width, float resize_height)`
 
 	This is where the real meat and taters is of our progress so far. This handles setting up our error struct, actually opening the image provided and reading the header data, pixel data, etc.
 
-## Documenting Progress
+## Documenting progress
 Making progress
 
 So far, I have created a function to read a JPEG. This initializes a struct (decompression struct) with jpeg_create_decompress. I have some basic error handling that will let you know if our code found the file you provided. Then I start the decompression process.	
@@ -148,4 +156,27 @@ Now is time to give our new resize buffer over to our save_jpeg function. Now, w
 
 After some config telling our struct about our image, we use `jpeg_start_compress` and then implement a while loop to write our scanlines into our struct. Finally, we use `jpeg_finish_compress` to get our image!
 
+### Restructuring the codebase
+
+So, I've really coded myself into a hole- and it blows ass. I'm having troubles thinking about how to implement features into my existing code and it's hard, because instead of structuring my code around a monolith main function that will handle and pass the data structures to functions to read, edit, and manipulate data, I've instead built a chain of functions that pass things down from one to the other, based off an initial singular call in main.
+
+So our main function goes from:
+![[Screenshot 2025-06-15 at 9.35.24 PM.png]]
+An update after a few sessions of banging my head through the restructue:
+I finally have it to a point that I am really happy with.
+
+The new main function:
+![[Screenshot 2025-06-15 at 9.33.18 PM.png]]
+I was battling a nasty ass shitty ass bug that was preventing me from merging the changes from the restructure into my main branch. But finally, after a few sessions banging my head into the wall I took a step back and really went picking through the codebase and found that inside of `resize_jpeg` I was defining the variables `source_x` and `source_y` as one as an integer and the other as a float. This was causing I think some sort of misalignment with the later calculations. Not 100% sure the reason why this was a fix, but hey, it was a fix.
+
+### Implementing a default image name generator
+I want to implement a default image name generator to simplify use. In my mind, the less the user has to type when using the program, the more convenient it will be to use.
+
+Instead of 
+
+	> imgy 1200x1600 /images/BigAssGun.jpg bigassresized.jpg
+
+We can give no specified name and just have the program generate a name
+
+	> imgy 1200x1600 /images/BigAssGun.jpg 
 

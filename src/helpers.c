@@ -37,6 +37,10 @@ FILE* write_file(char *filepath) {
   }
 }
 
+char* generate_file_name(char* input_name) {
+  return "Hi";
+}
+
 int usage_validation(int argc) {
   if (argc < 4 || argc > 4) {
     printf("Usage:\timgy 800x600 </path/to/sourceImage> <path/to/resizedImage\n");
