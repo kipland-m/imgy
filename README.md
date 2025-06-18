@@ -161,12 +161,41 @@ After some config telling our struct about our image, we use `jpeg_start_compres
 So, I've really coded myself into a hole- and it blows ass. I'm having troubles thinking about how to implement features into my existing code and it's hard, because instead of structuring my code around a monolith main function that will handle and pass the data structures to functions to read, edit, and manipulate data, I've instead built a chain of functions that pass things down from one to the other, based off an initial singular call in main.
 
 So our main function goes from:
-![[Screenshot 2025-06-15 at 9.35.24 PM.png]]
+
+```
+int main(int argc, char *argv[]) {
+  read_jpeg(argv[1], argv[2]);
+
+  return 0;
+}
+```
+
 An update after a few sessions of banging my head through the restructue:
 I finally have it to a point that I am really happy with.
 
 The new main function:
-![[Screenshot 2025-06-15 at 9.33.18 PM.png]]
+
+```
+int main(int argc, char *argv[]) {
+  struct Dimensions arg_dimensions;
+  struct jpeg_decompress_struct decomp;
+  jpeg_create_decompress(&decomp);
+
+  unsigned char *full_buffer = NULL;
+  unsigned char *resize_buffer = NULL;
+  JSAMPARRAY row_pointers = NULL; 
+  
+  usage_validation(argc);
+  parse_size_arg(argv[1], &arg_dimensions.width, &arg_dimensions.height);
+
+  (void) do_read_jpeg(&decomp, argv[2], &full_buffer);
+  (void) resize_jpeg(&decomp, full_buffer, &row_pointers, &resize_buffer, arg_dimensions.width, arg_dimensions.height);
+  (void) save_jpeg(resize_buffer, argv[3], row_pointers, arg_dimensions.width, arg_dimensions.height);
+
+  return (0);
+}
+```
+
 I was battling a nasty ass shitty ass bug that was preventing me from merging the changes from the restructure into my main branch. But finally, after a few sessions banging my head into the wall I took a step back and really went picking through the codebase and found that inside of `resize_jpeg` I was defining the variables `source_x` and `source_y` as one as an integer and the other as a float. This was causing I think some sort of misalignment with the later calculations. Not 100% sure the reason why this was a fix, but hey, it was a fix.
 
 ### Implementing a default image name generator
